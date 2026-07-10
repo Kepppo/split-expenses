@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { X } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -37,8 +39,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="relative w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
+        <Link
+          href="/"
+          className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </Link>
         <div>
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
             Sign in to SplitExpenses
