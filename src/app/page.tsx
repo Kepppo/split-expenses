@@ -2,35 +2,12 @@
 
 import Link from 'next/link';
 import { Wallet, Users, Tag, Receipt } from 'lucide-react';
+import { Navbar } from '@/components/Navbar';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="border-b bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between">
-            <div className="flex">
-              <div className="flex flex-shrink-0 items-center">
-                <span className="text-xl font-bold text-gray-900">SplitExpenses</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-              >
-                Get started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main>
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
