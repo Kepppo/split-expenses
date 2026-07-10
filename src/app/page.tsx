@@ -1,10 +1,34 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Wallet, Users, Tag, Receipt } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace('/dashboard');
+      } else {
+        setCheckingAuth(false);
+      }
+    });
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
