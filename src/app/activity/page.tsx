@@ -55,56 +55,56 @@ export default function ActivityPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">Loading...</p>
+          <p className="text-center text-ledger-ink-muted">Loading...</p>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Activity Log</h1>
-          <p className="mt-2 text-gray-600">Audit trail of all changes</p>
+          <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Activity Log</h1>
+          <p className="mt-2 text-ledger-ink-muted">Audit trail of all changes</p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
             {error}
           </div>
         )}
 
-        <div className="rounded-lg bg-white shadow overflow-hidden">
-          <ul className="divide-y divide-gray-200">
+        <div className="rounded-sm bg-ledger-card border border-ledger-rule overflow-hidden">
+          <ul className="divide-y divide-ledger-rule">
             {logs.map((log) => (
               <li key={log.id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-ledger-ink">
                       {log.action === 'create' ? 'Created' : log.action === 'update' ? 'Updated' : 'Deleted'} {log.entity_type}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-ledger-ink-muted">
                       ID: {log.entity_id}
                     </p>
                     {Object.keys(log.changes_json).length > 0 && (
-                      <pre className="mt-2 text-xs text-gray-600">
+                      <pre className="mt-2 text-xs text-ledger-ink-muted">
                         {JSON.stringify(log.changes_json, null, 2)}
                       </pre>
                     )}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-ledger-ink-muted">
                     {new Date(log.created_at).toLocaleString()}
                   </div>
                 </div>
               </li>
             ))}
             {logs.length === 0 && (
-              <li className="px-6 py-8 text-center text-gray-500">
+              <li className="px-6 py-8 text-center text-ledger-ink-muted">
                 No activity yet.
               </li>
             )}

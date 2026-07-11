@@ -138,48 +138,48 @@ export default function GroupsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">Loading...</p>
+          <p className="text-center text-ledger-ink-muted">Loading...</p>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-          <p className="mt-2 text-gray-600">Share expenses with the real people in your groups</p>
+          <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Groups</h1>
+          <p className="mt-2 text-ledger-ink-muted">Share expenses with the real people in your groups</p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
         )}
 
         {invites.length > 0 && (
-          <div className="mb-8 rounded-lg bg-indigo-50 p-6">
-            <h2 className="mb-3 text-lg font-medium text-indigo-900">Pending invites</h2>
+          <div className="mb-8 rounded-sm bg-ledger-teal-light p-6">
+            <h2 className="mb-3 text-lg font-medium text-ledger-teal-dark">Pending invites</h2>
             <div className="space-y-3">
               {invites.map((invite) => (
-                <div key={invite.id} className="flex items-center justify-between rounded-md bg-white p-4 shadow-sm">
-                  <span className="text-sm text-gray-900">
+                <div key={invite.id} className="flex items-center justify-between rounded-sm bg-ledger-card p-4 border border-ledger-rule">
+                  <span className="text-sm text-ledger-ink">
                     You&apos;ve been invited to <strong>{groupNamesByInvite[invite.group_id] || 'a group'}</strong>
                   </span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => acceptInvite(invite.id)}
-                      className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+                      className="inline-flex items-center rounded-sm bg-ledger-teal px-3 py-1.5 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                     >
                       <Check className="mr-1 h-4 w-4" />
                       Accept
                     </button>
                     <button
                       onClick={() => declineInvite(invite.id)}
-                      className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      className="inline-flex items-center rounded-sm border border-ledger-rule px-3 py-1.5 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
                     >
                       <XIcon className="mr-1 h-4 w-4" />
                       Decline
@@ -197,11 +197,11 @@ export default function GroupsPage() {
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
             placeholder="New group name (e.g., Apartment, Iceland Trip)"
-            className="flex-1 rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+            className="flex-1 rounded-sm border border-ledger-rule px-4 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
           />
           <button
             type="submit"
-            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
           >
             <Plus className="mr-2 h-4 w-4" />
             Create Group
@@ -213,11 +213,11 @@ export default function GroupsPage() {
             <Link
               key={group.id}
               href={`/groups/${group.id}`}
-              className="flex items-center justify-between rounded-lg bg-white p-6 shadow hover:shadow-md"
+              className="flex items-center justify-between rounded-sm bg-ledger-card p-6 border border-ledger-rule hover:border-ledger-teal"
             >
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{group.name}</h3>
-                <p className="mt-1 flex items-center text-sm text-gray-500">
+                <h3 className="font-serif text-lg font-semibold text-ledger-ink">{group.name}</h3>
+                <p className="mt-1 flex items-center text-sm text-ledger-ink-muted">
                   <Users className="mr-1 h-4 w-4" />
                   {memberCounts[group.id] || 1} member{(memberCounts[group.id] || 1) === 1 ? '' : 's'}
                 </p>
@@ -225,7 +225,7 @@ export default function GroupsPage() {
             </Link>
           ))}
           {groups.length === 0 && (
-            <p className="col-span-full text-center text-gray-500">
+            <p className="col-span-full text-center text-ledger-ink-muted">
               No groups yet. Create your first group above.
             </p>
           )}

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { AppUser, Group, GroupMember, Expense, ExpenseSplit, Settlement } from '@/types';
 import { calculateNetBalances, simplifyDebts } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
+import { Money } from '@/components/LedgerCard';
 import { PlusCircle, Wallet, Receipt, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -106,75 +107,75 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">Loading...</p>
+          <p className="text-center text-ledger-ink-muted">Loading...</p>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Overview of your shared expenses</p>
+          <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Dashboard</h1>
+          <p className="mt-2 text-ledger-ink-muted">Overview of your shared expenses</p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
             {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
             <div className="flex items-center">
-              <div className="rounded-md bg-green-100 p-3">
-                <Wallet className="h-6 w-6 text-green-600" />
+              <div className="rounded-sm bg-ledger-teal-light p-3">
+                <Wallet className="h-6 w-6 text-ledger-teal" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Owed to you</p>
-                <p className="text-2xl font-semibold text-green-600">${totalOwedToMe.toFixed(2)}</p>
+                <p className="text-sm font-medium text-ledger-ink-muted">Owed to you</p>
+                <Money amount={totalOwedToMe} className="text-2xl" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
             <div className="flex items-center">
-              <div className="rounded-md bg-red-100 p-3">
-                <Wallet className="h-6 w-6 text-red-600" />
+              <div className="rounded-sm bg-ledger-red-light p-3">
+                <Wallet className="h-6 w-6 text-ledger-red" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">You owe</p>
-                <p className="text-2xl font-semibold text-red-600">${totalIOwe.toFixed(2)}</p>
+                <p className="text-sm font-medium text-ledger-ink-muted">You owe</p>
+                <Money amount={-totalIOwe} className="text-2xl" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
             <div className="flex items-center">
-              <div className="rounded-md bg-indigo-100 p-3">
-                <Users className="h-6 w-6 text-indigo-600" />
+              <div className="rounded-sm bg-ledger-teal-light p-3">
+                <Users className="h-6 w-6 text-ledger-teal" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Groups</p>
-                <p className="text-2xl font-semibold text-gray-900">{summaries.length}</p>
+                <p className="text-sm font-medium text-ledger-ink-muted">Groups</p>
+                <p className="font-mono text-2xl font-medium text-ledger-ink">{summaries.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
             <div className="flex items-center">
-              <div className="rounded-md bg-blue-100 p-3">
-                <Receipt className="h-6 w-6 text-blue-600" />
+              <div className="rounded-sm bg-ledger-paper p-3">
+                <Receipt className="h-6 w-6 text-ledger-ink-muted" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Transactions</p>
-                <p className="text-2xl font-semibold text-gray-900">{totalExpenseCount}</p>
+                <p className="text-sm font-medium text-ledger-ink-muted">Transactions</p>
+                <p className="font-mono text-2xl font-medium text-ledger-ink">{totalExpenseCount}</p>
               </div>
             </div>
           </div>
@@ -182,10 +183,10 @@ export default function DashboardPage() {
 
         <div className="mt-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Your Groups</h2>
+            <h2 className="font-serif text-xl font-semibold text-ledger-ink">Your Groups</h2>
             <Link
               href="/expenses"
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Expense
@@ -196,26 +197,20 @@ export default function DashboardPage() {
               <Link
                 key={group.id}
                 href={`/groups/${group.id}`}
-                className="rounded-lg bg-white p-6 shadow hover:shadow-md"
+                className="rounded-sm bg-ledger-card p-6 border border-ledger-rule hover:border-ledger-teal"
               >
-                <h3 className="text-lg font-medium text-gray-900">{group.name}</h3>
-                <p className="mt-1 text-sm text-gray-500">{members.length} member{members.length === 1 ? '' : 's'}</p>
-                <p
-                  className={`mt-3 text-2xl font-bold ${
-                    myBalance >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {myBalance >= 0 ? '+' : ''}${myBalance.toFixed(2)}
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="font-serif text-lg font-semibold text-ledger-ink">{group.name}</h3>
+                <p className="mt-1 text-sm text-ledger-ink-muted">{members.length} member{members.length === 1 ? '' : 's'}</p>
+                <Money amount={myBalance} className="mt-3 block text-2xl" />
+                <p className="mt-1 text-sm text-ledger-ink-muted">
                   {myBalance >= 0 ? 'owed to you' : 'you owe'}
                 </p>
               </Link>
             ))}
             {summaries.length === 0 && (
-              <p className="col-span-full text-center text-gray-500">
+              <p className="col-span-full text-center text-ledger-ink-muted">
                 No groups yet.{' '}
-                <Link href="/groups" className="text-indigo-600 hover:underline">Create your first group</Link>{' '}
+                <Link href="/groups" className="text-ledger-teal hover:underline">Create your first group</Link>{' '}
                 to get started.
               </p>
             )}

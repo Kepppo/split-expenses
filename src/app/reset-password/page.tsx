@@ -69,20 +69,20 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
-        <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-ledger-paper px-4">
+      <div className="w-full max-w-md space-y-8 rounded-sm bg-ledger-card p-8 shadow-lg">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-ledger-ink">
           Set a new password
         </h2>
 
         {invalidLink && (
           <div className="space-y-4">
-            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
               This reset link is invalid or has expired. Request a new one.
             </div>
             <Link
               href="/forgot-password"
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+              className="flex w-full justify-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark"
             >
               Request a new link
             </Link>
@@ -90,16 +90,16 @@ export default function ResetPasswordPage() {
         )}
 
         {!invalidLink && !ready && (
-          <p className="text-center text-sm text-gray-500">Verifying your reset link...</p>
+          <p className="text-center text-sm text-ledger-ink-muted">Verifying your reset link...</p>
         )}
 
         {ready && !done && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+              <div className="rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
             )}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-ledger-ink">
                 New password
               </label>
               <input
@@ -108,11 +108,11 @@ export default function ResetPasswordPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ledger-ink">
                 Confirm new password
               </label>
               <input
@@ -121,13 +121,13 @@ export default function ResetPasswordPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Update password'}
             </button>
@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
         )}
 
         {done && (
-          <div className="rounded-md bg-green-50 p-4 text-sm text-green-700">
+          <div className="rounded-sm bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
             Password updated. Taking you to your dashboard...
           </div>
         )}

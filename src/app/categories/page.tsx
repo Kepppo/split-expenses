@@ -118,10 +118,10 @@ function CategoriesPageInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">Loading...</p>
+          <p className="text-center text-ledger-ink-muted">Loading...</p>
         </main>
       </div>
     );
@@ -129,12 +129,12 @@ function CategoriesPageInner() {
 
   if (groups.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">
+          <p className="text-center text-ledger-ink-muted">
             You&apos;re not in any groups yet. Create one on the{' '}
-            <a href="/groups" className="text-indigo-600 hover:underline">Groups</a> page first.
+            <a href="/groups" className="text-ledger-teal hover:underline">Groups</a> page first.
           </p>
         </main>
       </div>
@@ -142,18 +142,18 @@ function CategoriesPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-            <p className="mt-2 text-gray-600">Organize expenses by category with default split rules</p>
+            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Categories</h1>
+            <p className="mt-2 text-ledger-ink-muted">Organize expenses by category with default split rules</p>
           </div>
           <select
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+            className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
           >
             {groups.map((g) => (
               <option key={g.id} value={g.id}>{g.name}</option>
@@ -162,25 +162,25 @@ function CategoriesPageInner() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
             {error}
           </div>
         )}
 
-        <form onSubmit={addCategory} className="mb-8 rounded-lg bg-white p-6 shadow">
+        <form onSubmit={addCategory} className="mb-8 rounded-sm bg-ledger-card p-6 border border-ledger-rule">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <label className="block text-sm font-medium text-ledger-ink">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Groceries"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Color</label>
+              <label className="block text-sm font-medium text-ledger-ink">Color</label>
               <div className="mt-1 flex gap-2">
                 {COLORS.map((c) => (
                   <button
@@ -188,7 +188,7 @@ function CategoriesPageInner() {
                     type="button"
                     onClick={() => setColor(c)}
                     className={`h-8 w-8 rounded-full border-2 ${
-                      color === c ? 'border-gray-900' : 'border-transparent'
+                      color === c ? 'border-ledger-ink' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: c }}
                   />
@@ -196,11 +196,11 @@ function CategoriesPageInner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Default Split</label>
+              <label className="block text-sm font-medium text-ledger-ink">Default Split</label>
               <select
                 value={splitType}
                 onChange={(e) => setSplitType(e.target.value as Category['default_split_type'])}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               >
                 {SPLIT_TYPES.map((st) => (
                   <option key={st.value} value={st.value}>{st.label}</option>
@@ -210,7 +210,7 @@ function CategoriesPageInner() {
             <div className="flex items-end">
               <button
                 type="submit"
-                className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Category
@@ -221,29 +221,29 @@ function CategoriesPageInner() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between rounded-lg bg-white p-6 shadow">
+            <div key={category.id} className="flex items-center justify-between rounded-sm bg-ledger-card p-6 border border-ledger-rule">
               <div className="flex items-center">
                 <div
                   className="h-4 w-4 rounded-full"
                   style={{ backgroundColor: category.color }}
                 />
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">{category.name}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-serif text-lg font-semibold text-ledger-ink">{category.name}</h3>
+                  <p className="text-sm text-ledger-ink-muted">
                     Default: {SPLIT_TYPES.find(st => st.value === category.default_split_type)?.label}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => deleteCategory(category.id)}
-                className="rounded-md p-2 text-red-600 hover:bg-red-50"
+                className="rounded-sm p-2 text-ledger-red hover:bg-ledger-red-light"
               >
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
           ))}
           {categories.length === 0 && (
-            <p className="col-span-full text-center text-gray-500">
+            <p className="col-span-full text-center text-ledger-ink-muted">
               No categories yet. Create your first category above.
             </p>
           )}

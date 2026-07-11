@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { AppUser, Group, Category, Expense, ExpenseSplit, SplitType } from '@/types';
 import { splitEqually } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
+import { Money } from '@/components/LedgerCard';
+import { Avatar } from '@/components/Avatar';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -230,15 +232,17 @@ function ExpensesPageInner() {
   };
 
   const getUserName = (id: string) => members.find((m) => m.id === id)?.name || (id === currentUserId ? 'You' : 'Unknown');
+  const getUser = (id: string): AppUser =>
+    members.find((m) => m.id === id) || { id, email: '', name: 'Unknown', avatar_url: null, created_at: '' };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || 'Uncategorized';
   const getCategoryColor = (id: string | null) => categories.find((c) => c.id === id)?.color || '#ccc';
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">Loading...</p>
+          <p className="text-center text-ledger-ink-muted">Loading...</p>
         </main>
       </div>
     );
@@ -246,12 +250,12 @@ function ExpensesPageInner() {
 
   if (groups.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ledger-paper">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">
+          <p className="text-center text-ledger-ink-muted">
             You&apos;re not in any groups yet. Create one on the{' '}
-            <a href="/groups" className="text-indigo-600 hover:underline">Groups</a> page first.
+            <a href="/groups" className="text-ledger-teal hover:underline">Groups</a> page first.
           </p>
         </main>
       </div>
@@ -259,19 +263,19 @@ function ExpensesPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
-            <p className="mt-2 text-gray-600">Track and split expenses with your group</p>
+            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Expenses</h1>
+            <p className="mt-2 text-ledger-ink-muted">Track and split expenses with your group</p>
           </div>
           <div className="flex items-center gap-3">
             <select
               value={groupId}
               onChange={(e) => { setGroupId(e.target.value); setShowForm(false); }}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
             >
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
@@ -279,7 +283,7 @@ function ExpensesPageInner() {
             </select>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Expense
@@ -288,53 +292,53 @@ function ExpensesPageInner() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
         )}
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mb-8 rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-4 text-lg font-medium text-gray-900">
+          <form onSubmit={handleSubmit} className="mb-8 rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">
               {editingId ? 'Edit Expense' : 'New Expense'}
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-ledger-ink">Description</label>
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Amount</label>
+                <label className="block text-sm font-medium text-ledger-ink">Amount</label>
                 <input
                   type="number"
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Date</label>
+                <label className="block text-sm font-medium text-ledger-ink">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Paid By</label>
+                <label className="block text-sm font-medium text-ledger-ink">Paid By</label>
                 <select
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 >
                   <option value="">Select who paid</option>
                   {members.map((m) => (
@@ -343,11 +347,11 @@ function ExpensesPageInner() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <label className="block text-sm font-medium text-ledger-ink">Category</label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 >
                   <option value="">Uncategorized</option>
                   {categories.map((c) => (
@@ -356,11 +360,11 @@ function ExpensesPageInner() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Split Type</label>
+                <label className="block text-sm font-medium text-ledger-ink">Split Type</label>
                 <select
                   value={splitType}
                   onChange={(e) => setSplitType(e.target.value as SplitType)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 >
                   <option value="equal">Equal</option>
                   <option value="percentage">Percentage</option>
@@ -371,7 +375,7 @@ function ExpensesPageInner() {
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">Split Among</label>
+              <label className="block text-sm font-medium text-ledger-ink">Split Among</label>
               <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
                 {members.map((m) => (
                   <div key={m.id} className="flex items-center gap-2">
@@ -379,16 +383,17 @@ function ExpensesPageInner() {
                       type="checkbox"
                       checked={!!includedMembers[m.id]}
                       onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-ledger-rule text-ledger-teal focus:ring-ledger-teal"
                     />
-                    <span className="w-24 text-sm text-gray-700">{m.id === currentUserId ? 'You' : m.name}</span>
+                    <Avatar user={m} size="sm" />
+                    <span className="w-20 text-sm text-ledger-ink">{m.id === currentUserId ? 'You' : m.name}</span>
                     <input
                       type="text"
                       value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
                       onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
                       placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : '$'}
                       disabled={splitType === 'equal' || !includedMembers[m.id]}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:bg-gray-100"
+                      className="block w-full rounded-sm border border-ledger-rule px-3 py-1 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal disabled:bg-ledger-paper"
                     />
                   </div>
                 ))}
@@ -398,14 +403,14 @@ function ExpensesPageInner() {
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
-                className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
               >
                 {editingId ? 'Update' : 'Create'} Expense
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="inline-flex items-center rounded-sm border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
               >
                 Cancel
               </button>
@@ -417,7 +422,7 @@ function ExpensesPageInner() {
           {expenses.map((expense) => {
             const expenseSplits = splits.filter((s) => s.expense_id === expense.id);
             return (
-              <div key={expense.id} className="rounded-lg bg-white p-6 shadow">
+              <div key={expense.id} className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
@@ -425,18 +430,20 @@ function ExpensesPageInner() {
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: getCategoryColor(expense.category_id) }}
                       />
-                      <h3 className="text-lg font-medium text-gray-900">{expense.description}</h3>
+                      <Avatar user={getUser(expense.paid_by)} size="sm" />
+                      <h3 className="font-serif text-lg font-semibold text-ledger-ink">{expense.description}</h3>
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
-                      <span>${expense.amount.toFixed(2)}</span>
+                    <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ledger-ink-muted">
+                      <Money amount={expense.amount} neutral />
                       <span>Paid by {getUserName(expense.paid_by)}</span>
                       <span>{getCategoryName(expense.category_id)}</span>
                       <span>{new Date(expense.date).toLocaleDateString()}</span>
                     </div>
-                    <div className="mt-2 text-sm text-gray-600">
+                    <div className="mt-2 flex flex-wrap gap-4 text-sm text-ledger-ink-muted">
                       {expenseSplits.map((s) => (
-                        <span key={s.id} className="mr-4">
-                          {getUserName(s.user_id)}: ${s.amount.toFixed(2)}
+                        <span key={s.id} className="inline-flex items-center gap-1.5">
+                          <Avatar user={getUser(s.user_id)} size="sm" />
+                          {getUserName(s.user_id)}: <Money amount={s.amount} neutral />
                         </span>
                       ))}
                     </div>
@@ -444,13 +451,13 @@ function ExpensesPageInner() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(expense)}
-                      className="rounded-md p-2 text-gray-600 hover:bg-gray-100"
+                      className="rounded-sm p-2 text-ledger-ink-muted hover:bg-ledger-paper"
                     >
                       <Edit className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => deleteExpense(expense.id)}
-                      className="rounded-md p-2 text-red-600 hover:bg-red-50"
+                      className="rounded-sm p-2 text-ledger-red hover:bg-ledger-red-light"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -460,7 +467,7 @@ function ExpensesPageInner() {
             );
           })}
           {expenses.length === 0 && (
-            <p className="text-center text-gray-500">No expenses yet. Add your first expense above.</p>
+            <p className="text-center text-ledger-ink-muted">No expenses yet. Add your first expense above.</p>
           )}
         </div>
       </main>
