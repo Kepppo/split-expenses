@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Category } from '@/types';
+import { Category, Group } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { Plus, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const COLORS = [
   '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1',
@@ -19,8 +19,12 @@ const SPLIT_TYPES = [
   { value: 'custom', label: 'Custom' },
 ] as const;
 
-export default function CategoriesPage() {
+function CategoriesPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<string>(searchParams.get('group') || '');
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS[0]);
@@ -37,26 +41,43 @@ export default function CategoriesPage() {
   }, [router]);
 
   useEffect(() => {
-    fetchCategories();
-
-    const channel = supabase
-      .channel('categories-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'categories' },
-        () => fetchCategories()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    fetchGroups();
   }, []);
+
+  useEffect(() => {
+    if (groupId) {
+      fetchCategories();
+
+      const channel = supabase
+        .channel(`categories-${groupId}-changes`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'categories', filter: `group_id=eq.${groupId}` },
+          () => fetchCategories()
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [groupId]);
+
+  const fetchGroups = async () => {
+    const { data } = await supabase.from('groups').select('*').order('created_at', { ascending: true });
+    setGroups(data || []);
+    if (!groupId && data && data.length > 0) {
+      setGroupId(data[0].id);
+    } else {
+      setLoading(false);
+    }
+  };
 
   const fetchCategories = async () => {
     const { data } = await supabase
       .from('categories')
       .select('*')
+      .eq('group_id', groupId)
       .order('created_at', { ascending: true });
 
     setCategories(data || []);
@@ -66,16 +87,10 @@ export default function CategoriesPage() {
   const addCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!name.trim()) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setError('You must be logged in to add categories');
-      return;
-    }
+    if (!name.trim() || !groupId) return;
 
     const { error: insertError } = await supabase.from('categories').insert({
-      user_id: user.id,
+      group_id: groupId,
       name: name.trim(),
       color,
       default_split_type: splitType,
@@ -112,13 +127,38 @@ export default function CategoriesPage() {
     );
   }
 
+  if (groups.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <p className="text-center text-gray-500">
+            You&apos;re not in any groups yet. Create one on the{' '}
+            <a href="/groups" className="text-indigo-600 hover:underline">Groups</a> page first.
+          </p>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-          <p className="mt-2 text-gray-600">Organize expenses by category with default split rules</p>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
+            <p className="mt-2 text-gray-600">Organize expenses by category with default split rules</p>
+          </div>
+          <select
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+          >
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
         </div>
 
         {error && (
@@ -210,5 +250,13 @@ export default function CategoriesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CategoriesPageInner />
+    </Suspense>
   );
 }
