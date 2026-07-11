@@ -9,7 +9,7 @@ import { Wallet, Users, Tag, Receipt, ScrollText, LogOut, Menu, X } from 'lucide
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Wallet },
-  { href: '/profiles', label: 'Profiles', icon: Users },
+  { href: '/groups', label: 'Groups', icon: Users },
   { href: '/categories', label: 'Categories', icon: Tag },
   { href: '/expenses', label: 'Expenses', icon: Receipt },
   { href: '/activity', label: 'Activity', icon: ScrollText },

@@ -4,10 +4,12 @@ A personal expense-sharing app built with Next.js, TypeScript, Tailwind CSS, and
 
 ## Features
 
-- **Multi-profile management**: Create profiles for yourself, partner, roommates, or trips
-- **Category-based splitting**: Organize expenses by category with custom split rules
+- **Real users, real groups**: No more fake "profiles" — every participant is an actual logged-in account. Create a group and invite people by email; they see and manage their own shared expenses from their own login.
+- **Category-based splitting**: Organize expenses by category with custom split rules, shared within a group
+- **Settle up**: Record a payment between two real users to pay down what's owed — it nets against the balance immediately
 - **Real-time synchronization**: Balances and summaries update instantly across all devices
 - **Flexible split rules**: Equal, percentage, fixed amount, and custom per-person shares
+- **Debt simplification**: Balances are reduced to the minimum number of "who pays whom" transactions
 - **Activity audit trail**: Full history of all changes
 - **Responsive design**: Works on desktop and mobile
 
@@ -58,14 +60,15 @@ Open http://localhost:3000 in your browser.
 
 ### 5. Create Your Account
 
-- Click **Sign up** to create an account
-- The first user is automatically the account owner
+- Click **Sign up** to create an account. Every real participant needs to do this — there's no "owner adds fake profiles for everyone" anymore.
 
 ### 6. Start Using the App
 
-1. Go to **Profiles** and create profiles (e.g., "Me", "Partner")
-2. Go to **Categories** and create expense categories
-3. Go to **Expenses** to add expenses with split rules
+1. Go to **Groups**, create a group, and invite the other real people by email
+2. Once they sign up and accept the invite, they'll see the group and its balances from their own login
+3. Go to **Categories** and create expense categories for the group
+4. Go to **Expenses** to add expenses with split rules
+5. Use **Settle Up** on a group page to record a payment and net it against the balance
 4. View real-time balances on the **Dashboard**
 
 ## Deployment
@@ -86,24 +89,28 @@ Your Supabase project is already hosted. No additional deployment needed.
 ```
 src/
   app/
-    layout.tsx          - Root layout
-    page.tsx           - Home (redirects to dashboard)
-    login/page.tsx     - Login page
-    signup/page.tsx    - Signup page
-    dashboard/page.tsx - Dashboard with balances
-    profiles/page.tsx  - Profile management
-    categories/page.tsx - Category management
-    expenses/page.tsx  - Expense creation/editing
-    activity/page.tsx  - Activity log
+    layout.tsx             - Root layout
+    page.tsx                - Home (redirects to dashboard)
+    login/page.tsx          - Login page
+    signup/page.tsx         - Signup page
+    dashboard/page.tsx      - Cross-group balance overview
+    groups/page.tsx         - Group list, creation, invite acceptance
+    groups/[id]/page.tsx    - Group detail: members, balances, settle up
+    categories/page.tsx     - Category management (per group)
+    expenses/page.tsx       - Expense creation/editing (per group)
+    activity/page.tsx       - Activity log
   components/
-    Navbar.tsx         - Navigation bar
+    Navbar.tsx              - Navigation bar
+    SettleUpModal.tsx       - Record a settlement payment
   lib/
-    supabase.ts        - Supabase client
-    utils.ts           - Utility functions
+    supabase.ts             - Supabase client
+    balances.ts             - Net balance + debt-simplification math
+    utils.ts                - Utility functions
   types/
-    index.ts           - TypeScript interfaces
+    index.ts                - TypeScript interfaces
 supabase/
-  schema.sql          - Database schema and RLS policies
+  schema.sql               - Database schema and RLS policies (fresh installs)
+  MIGRATION_NOTES.md        - Notes on moving off the old fake-profiles schema
 ```
 
 ## License

@@ -1,85 +1,125 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Profile, Category, Expense, ExpenseSplit, SplitType } from '@/types';
+import { AppUser, Group, Category, Expense, ExpenseSplit, SplitType } from '@/types';
+import { splitEqually } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
 import { Plus, Trash2, Edit } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ExpensesPage() {
+function ExpensesPageInner() {
   const router = useRouter();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const searchParams = useSearchParams();
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<string>(searchParams.get('group') || '');
+  const [members, setMembers] = useState<AppUser[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [splits, setSplits] = useState<ExpenseSplit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        router.push('/login');
-      }
-    });
-  }, [router]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [profileId, setProfileId] = useState('');
+  const [paidBy, setPaidBy] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [splitType, setSplitType] = useState<SplitType>('equal');
   const [splitValues, setSplitValues] = useState<Record<string, string>>({});
+  const [includedMembers, setIncludedMembers] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchData();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.push('/login');
+      } else {
+        setCurrentUserId(user.id);
+      }
+    });
+  }, [router]);
 
-    const channel = supabase
-      .channel('expenses-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'expenses' },
-        () => fetchData()
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'expense_splits' },
-        () => fetchData()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+  useEffect(() => {
+    fetchGroups();
   }, []);
 
-  const fetchData = async () => {
-    const { data: profilesData } = await supabase.from('profiles').select('*');
-    const { data: categoriesData } = await supabase.from('categories').select('*');
-    const { data: expensesData } = await supabase
-      .from('expenses')
-      .select('*')
-      .order('date', { ascending: false });
-    const { data: splitsData } = await supabase.from('expense_splits').select('*');
+  useEffect(() => {
+    if (groupId) {
+      fetchGroupScopedData();
 
-    setProfiles(profilesData || []);
-    setCategories(categoriesData || []);
-    setExpenses(expensesData || []);
-    setSplits(splitsData || []);
-    setLoading(false);
+      const channel = supabase
+        .channel(`expenses-${groupId}-changes`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `group_id=eq.${groupId}` }, () => fetchGroupScopedData())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'expense_splits' }, () => fetchGroupScopedData())
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [groupId]);
+
+  const fetchGroups = async () => {
+    const { data } = await supabase.from('groups').select('*').order('created_at', { ascending: true });
+    setGroups(data || []);
+    if (!groupId && data && data.length > 0) {
+      setGroupId(data[0].id);
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const fetchGroupScopedData = async () => {
+    try {
+      const { data: membersData } = await supabase.from('group_members').select('user_id').eq('group_id', groupId);
+      const memberIds = (membersData || []).map((m: { user_id: string }) => m.user_id);
+      const { data: usersData } = memberIds.length
+        ? await supabase.from('users').select('*').in('id', memberIds)
+        : { data: [] };
+
+      const { data: categoriesData } = await supabase.from('categories').select('*').eq('group_id', groupId);
+      const { data: expensesData } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('group_id', groupId)
+        .order('date', { ascending: false });
+
+      const expenseIds = (expensesData || []).map((e: Expense) => e.id);
+      const { data: splitsData } = expenseIds.length
+        ? await supabase.from('expense_splits').select('*').in('expense_id', expenseIds)
+        : { data: [] };
+
+      setMembers(usersData || []);
+      setCategories(categoriesData || []);
+      setExpenses(expensesData || []);
+      setSplits(splitsData || []);
+
+      const included: Record<string, boolean> = {};
+      (usersData || []).forEach((u: AppUser) => (included[u.id] = true));
+      setIncludedMembers((prev) => (Object.keys(prev).length ? prev : included));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load expenses');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setDescription('');
     setAmount('');
     setDate(new Date().toISOString().split('T')[0]);
-    setProfileId('');
+    setPaidBy(currentUserId || '');
     setCategoryId('');
     setSplitType('equal');
     setSplitValues({});
+    const included: Record<string, boolean> = {};
+    members.forEach((m) => (included[m.id] = true));
+    setIncludedMembers(included);
     setShowForm(false);
     setEditingId(null);
   };
@@ -87,43 +127,35 @@ export default function ExpensesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!description.trim() || !amount || !date || !profileId || !categoryId) return;
+    if (!description.trim() || !amount || !date || !paidBy || !currentUserId) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setError('You must be logged in to add expenses');
+    const amountNum = parseFloat(amount);
+    const participantIds = members.filter((m) => includedMembers[m.id]).map((m) => m.id);
+    if (participantIds.length === 0) {
+      setError('Select at least one person to split this with');
       return;
     }
 
-    const amountNum = parseFloat(amount);
-    let splitRows: { profile_id: string; amount: number }[] = [];
+    let splitRows: { user_id: string; amount: number }[] = [];
 
     if (splitType === 'equal') {
-      const perPerson = amountNum / profiles.length;
-      splitRows = profiles.map((p) => ({
-        profile_id: p.id,
-        amount: Math.round(perPerson * 100) / 100,
-      }));
+      const shares = splitEqually(amountNum, participantIds);
+      splitRows = participantIds.map((id) => ({ user_id: id, amount: shares[id] }));
     } else if (splitType === 'percentage') {
-      splitRows = profiles.map((p) => ({
-        profile_id: p.id,
-        amount: (amountNum * (parseFloat(splitValues[p.id] || '0') / 100)),
+      splitRows = participantIds.map((id) => ({
+        user_id: id,
+        amount: Math.round(amountNum * (parseFloat(splitValues[id] || '0') / 100) * 100) / 100,
       }));
-    } else if (splitType === 'fixed') {
-      splitRows = profiles.map((p) => ({
-        profile_id: p.id,
-        amount: parseFloat(splitValues[p.id] || '0'),
-      }));
-    } else if (splitType === 'custom') {
-      splitRows = profiles.map((p) => ({
-        profile_id: p.id,
-        amount: parseFloat(splitValues[p.id] || '0'),
+    } else {
+      splitRows = participantIds.map((id) => ({
+        user_id: id,
+        amount: parseFloat(splitValues[id] || '0'),
       }));
     }
 
     const totalSplit = splitRows.reduce((sum, s) => sum + s.amount, 0);
     if (Math.abs(totalSplit - amountNum) > 0.01) {
-      setError('Split amounts must total the expense amount');
+      setError(`Split amounts total $${totalSplit.toFixed(2)}, but the expense is $${amountNum.toFixed(2)}`);
       return;
     }
 
@@ -133,43 +165,38 @@ export default function ExpensesPage() {
           description: description.trim(),
           amount: amountNum,
           date,
-          profile_id: profileId,
-          category_id: categoryId,
+          paid_by: paidBy,
+          category_id: categoryId || null,
         }).eq('id', editingId);
 
         await supabase.from('expense_splits').delete().eq('expense_id', editingId);
         for (const row of splitRows) {
-          await supabase.from('expense_splits').insert({
-            expense_id: editingId,
-            ...row,
-          });
+          await supabase.from('expense_splits').insert({ expense_id: editingId, ...row });
         }
       } else {
         const { data: expense } = await supabase
           .from('expenses')
           .insert({
-            user_id: user.id,
+            group_id: groupId,
+            created_by: currentUserId,
             description: description.trim(),
             amount: amountNum,
             date,
-            profile_id: profileId,
-            category_id: categoryId,
+            paid_by: paidBy,
+            category_id: categoryId || null,
           })
           .select()
           .single();
 
         if (expense) {
           for (const row of splitRows) {
-            await supabase.from('expense_splits').insert({
-              expense_id: expense.id,
-              ...row,
-            });
+            await supabase.from('expense_splits').insert({ expense_id: expense.id, ...row });
           }
         }
       }
 
       resetForm();
-      fetchData();
+      fetchGroupScopedData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     }
@@ -180,27 +207,31 @@ export default function ExpensesPage() {
     setDescription(expense.description);
     setAmount(expense.amount.toString());
     setDate(expense.date);
-    setProfileId(expense.profile_id);
-    setCategoryId(expense.category_id);
+    setPaidBy(expense.paid_by);
+    setCategoryId(expense.category_id || '');
 
     const expenseSplits = splits.filter((s) => s.expense_id === expense.id);
     const values: Record<string, string> = {};
+    const included: Record<string, boolean> = {};
     expenseSplits.forEach((s) => {
-      values[s.profile_id] = s.amount.toString();
+      values[s.user_id] = s.amount.toString();
+      included[s.user_id] = true;
     });
     setSplitValues(values);
+    setIncludedMembers(included);
+    setSplitType('custom');
     setShowForm(true);
   };
 
   const deleteExpense = async (id: string) => {
     await supabase.from('expense_splits').delete().eq('expense_id', id);
     await supabase.from('expenses').delete().eq('id', id);
-    fetchData();
+    fetchGroupScopedData();
   };
 
-  const getProfileName = (id: string) => profiles.find((p) => p.id === id)?.name || 'Unknown';
-  const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name || 'Unknown';
-  const getCategoryColor = (id: string) => categories.find((c) => c.id === id)?.color || '#ccc';
+  const getUserName = (id: string) => members.find((m) => m.id === id)?.name || (id === currentUserId ? 'You' : 'Unknown');
+  const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || 'Uncategorized';
+  const getCategoryColor = (id: string | null) => categories.find((c) => c.id === id)?.color || '#ccc';
 
   if (loading) {
     return (
@@ -213,28 +244,51 @@ export default function ExpensesPage() {
     );
   }
 
+  if (groups.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <p className="text-center text-gray-500">
+            You&apos;re not in any groups yet. Create one on the{' '}
+            <a href="/groups" className="text-indigo-600 hover:underline">Groups</a> page first.
+          </p>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
-            <p className="mt-2 text-gray-600">Track and split expenses across profiles</p>
+            <p className="mt-2 text-gray-600">Track and split expenses with your group</p>
           </div>
-          <button
-            onClick={() => { resetForm(); setShowForm(true); }}
-            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Expense
-          </button>
+          <div className="flex items-center gap-3">
+            <select
+              value={groupId}
+              onChange={(e) => { setGroupId(e.target.value); setShowForm(false); }}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+            >
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Expense
+            </button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
+          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
         )}
 
         {showForm && (
@@ -275,16 +329,16 @@ export default function ExpensesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Paid By Profile</label>
+                <label className="block text-sm font-medium text-gray-700">Paid By</label>
                 <select
-                  value={profileId}
-                  onChange={(e) => setProfileId(e.target.value)}
+                  value={paidBy}
+                  onChange={(e) => setPaidBy(e.target.value)}
                   required
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 >
-                  <option value="">Select profile</option>
-                  {profiles.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                  <option value="">Select who paid</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>{m.id === currentUserId ? 'You' : m.name}</option>
                   ))}
                 </select>
               </div>
@@ -293,10 +347,9 @@ export default function ExpensesPage() {
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  required
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 >
-                  <option value="">Select category</option>
+                  <option value="">Uncategorized</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
@@ -320,15 +373,21 @@ export default function ExpensesPage() {
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700">Split Among</label>
               <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                {profiles.map((p) => (
-                  <div key={p.id} className="flex items-center gap-2">
-                    <span className="text-sm text-gray-700">{p.name}</span>
+                {members.map((m) => (
+                  <div key={m.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!!includedMembers[m.id]}
+                      onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="w-24 text-sm text-gray-700">{m.id === currentUserId ? 'You' : m.name}</span>
                     <input
                       type="text"
-                      value={splitValues[p.id] || (splitType === 'equal' ? '' : '0')}
-                      onChange={(e) => setSplitValues({ ...splitValues, [p.id]: e.target.value })}
+                      value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
+                      onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
                       placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : '$'}
-                      disabled={splitType === 'equal'}
+                      disabled={splitType === 'equal' || !includedMembers[m.id]}
                       className="block w-full rounded-md border border-gray-300 px-3 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:bg-gray-100"
                     />
                   </div>
@@ -370,14 +429,14 @@ export default function ExpensesPage() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
                       <span>${expense.amount.toFixed(2)}</span>
-                      <span>Paid by {getProfileName(expense.profile_id)}</span>
+                      <span>Paid by {getUserName(expense.paid_by)}</span>
                       <span>{getCategoryName(expense.category_id)}</span>
                       <span>{new Date(expense.date).toLocaleDateString()}</span>
                     </div>
                     <div className="mt-2 text-sm text-gray-600">
                       {expenseSplits.map((s) => (
                         <span key={s.id} className="mr-4">
-                          {getProfileName(s.profile_id)}: ${s.amount.toFixed(2)}
+                          {getUserName(s.user_id)}: ${s.amount.toFixed(2)}
                         </span>
                       ))}
                     </div>
@@ -406,5 +465,13 @@ export default function ExpensesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ExpensesPageInner />
+    </Suspense>
   );
 }
