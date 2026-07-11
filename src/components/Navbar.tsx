@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { AppUser } from '@/types';
+import { Avatar } from '@/components/Avatar';
 import { Wallet, Users, Tag, Receipt, ScrollText, LogOut, Menu, X } from 'lucide-react';
 
 const navItems = [
@@ -17,7 +19,8 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string; id?: string } | null>(null);
+  const [profile, setProfile] = useState<AppUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -31,6 +34,16 @@ export function Navbar() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setProfile(null);
+      return;
+    }
+    supabase.from('users').select('*').eq('id', user.id).single().then(({ data }) => {
+      setProfile(data);
+    });
+  }, [user?.id]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -79,7 +92,8 @@ export function Navbar() {
 
           <div className="hidden sm:flex sm:items-center sm:gap-4">
             {user ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                {profile && <Avatar user={profile} size="sm" />}
                 <span className="text-sm text-ledger-ink-muted">{user.email}</span>
                 <button
                   onClick={handleLogout}

@@ -6,6 +6,7 @@ import { AppUser, Group, Category, Expense, ExpenseSplit, SplitType } from '@/ty
 import { splitEqually } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
+import { Avatar } from '@/components/Avatar';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -231,6 +232,8 @@ function ExpensesPageInner() {
   };
 
   const getUserName = (id: string) => members.find((m) => m.id === id)?.name || (id === currentUserId ? 'You' : 'Unknown');
+  const getUser = (id: string): AppUser =>
+    members.find((m) => m.id === id) || { id, email: '', name: 'Unknown', avatar_url: null, created_at: '' };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || 'Uncategorized';
   const getCategoryColor = (id: string | null) => categories.find((c) => c.id === id)?.color || '#ccc';
 
@@ -382,7 +385,8 @@ function ExpensesPageInner() {
                       onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
                       className="rounded border-ledger-rule text-ledger-teal focus:ring-ledger-teal"
                     />
-                    <span className="w-24 text-sm text-ledger-ink">{m.id === currentUserId ? 'You' : m.name}</span>
+                    <Avatar user={m} size="sm" />
+                    <span className="w-20 text-sm text-ledger-ink">{m.id === currentUserId ? 'You' : m.name}</span>
                     <input
                       type="text"
                       value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
@@ -426,6 +430,7 @@ function ExpensesPageInner() {
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: getCategoryColor(expense.category_id) }}
                       />
+                      <Avatar user={getUser(expense.paid_by)} size="sm" />
                       <h3 className="font-serif text-lg font-semibold text-ledger-ink">{expense.description}</h3>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ledger-ink-muted">
@@ -436,7 +441,8 @@ function ExpensesPageInner() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm text-ledger-ink-muted">
                       {expenseSplits.map((s) => (
-                        <span key={s.id}>
+                        <span key={s.id} className="inline-flex items-center gap-1.5">
+                          <Avatar user={getUser(s.user_id)} size="sm" />
                           {getUserName(s.user_id)}: <Money amount={s.amount} neutral />
                         </span>
                       ))}

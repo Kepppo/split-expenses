@@ -7,6 +7,7 @@ import { AppUser, Group, GroupMember, GroupInvite, Expense, ExpenseSplit, Settle
 import { calculateNetBalances, simplifyDebts } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
+import { Avatar, AvatarStack } from '@/components/Avatar';
 import { SettleUpModal } from '@/components/SettleUpModal';
 import { Mail, UserMinus, HandCoins } from 'lucide-react';
 import Link from 'next/link';
@@ -134,6 +135,8 @@ export default function GroupDetailPage() {
   };
 
   const getUserName = (id: string) => memberUsers.find((u) => u.id === id)?.name || 'Unknown';
+  const getUser = (id: string): AppUser =>
+    memberUsers.find((u) => u.id === id) || { id, email: '', name: 'Unknown', avatar_url: null, created_at: '' };
 
   const openSettleModal = (to?: string, amount?: number) => {
     setPrefill({ to, amount });
@@ -174,7 +177,10 @@ export default function GroupDetailPage() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl font-semibold text-ledger-ink">{group.name}</h1>
-            <p className="mt-2 text-ledger-ink-muted">{members.length} member{members.length === 1 ? '' : 's'}</p>
+            <div className="mt-2 flex items-center gap-3">
+              <AvatarStack users={memberUsers} />
+              <p className="text-ledger-ink-muted">{members.length} member{members.length === 1 ? '' : 's'}</p>
+            </div>
           </div>
           <div className="flex gap-3">
             <Link
@@ -206,7 +212,8 @@ export default function GroupDetailPage() {
                   const balance = netBalances[id] ?? 0;
                   return (
                     <div key={id} className="flex items-center justify-between">
-                      <span className="text-sm text-ledger-ink">
+                      <span className="flex items-center gap-2 text-sm text-ledger-ink">
+                        <Avatar user={getUser(id)} size="sm" />
                         {id === currentUserId ? 'You' : getUserName(id)}
                       </span>
                       <Money amount={balance} className="text-sm" />
@@ -278,11 +285,14 @@ export default function GroupDetailPage() {
               <div className="space-y-3">
                 {members.map((m) => (
                   <div key={m.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-ledger-ink">
-                        {getUserName(m.user_id)} {m.user_id === currentUserId && '(you)'}
-                      </p>
-                      <p className="text-xs text-ledger-ink-muted capitalize">{m.role}</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar user={getUser(m.user_id)} />
+                      <div>
+                        <p className="text-sm font-medium text-ledger-ink">
+                          {getUserName(m.user_id)} {m.user_id === currentUserId && '(you)'}
+                        </p>
+                        <p className="text-xs text-ledger-ink-muted capitalize">{m.role}</p>
+                      </div>
                     </div>
                     {m.role !== 'owner' && (
                       <button
