@@ -44,12 +44,12 @@ export function Navbar() {
   const isAuthPage = pathname === '/login' || pathname === '/signup';
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="border-b border-ledger-rule bg-ledger-card">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
+              <Link href="/" className="font-serif text-xl font-semibold text-ledger-ink">
                 SplitExpenses
               </Link>
             </div>
@@ -64,8 +64,8 @@ export function Navbar() {
                       className={cn(
                         'inline-flex items-center px-1 pt-1 text-sm font-medium',
                         isActive
-                          ? 'border-b-2 border-indigo-500 text-gray-900'
-                          : 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                          ? 'border-b-2 border-ledger-teal text-ledger-ink'
+                          : 'border-b-2 border-transparent text-ledger-ink-muted hover:border-ledger-rule hover:text-ledger-ink'
                       )}
                     >
                       <item.icon className="mr-2 h-4 w-4" />
@@ -80,10 +80,10 @@ export function Navbar() {
           <div className="hidden sm:flex sm:items-center sm:gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-700">{user.email}</span>
+                <span className="text-sm text-ledger-ink-muted">{user.email}</span>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="inline-flex items-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
@@ -94,13 +94,13 @@ export function Navbar() {
                 <div className="flex items-center gap-4">
                   <Link
                     href="/login"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                    className="text-sm font-medium text-ledger-ink-muted hover:text-ledger-ink"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/signup"
-                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                    className="rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                   >
                     Get started
                   </Link>
@@ -113,7 +113,7 @@ export function Navbar() {
           <div className="flex items-center sm:hidden">
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              className="inline-flex items-center justify-center rounded-sm p-2 text-ledger-ink-muted hover:bg-ledger-paper hover:text-ledger-ink"
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >
@@ -125,7 +125,7 @@ export function Navbar() {
 
       {/* Mobile menu panel */}
       {mobileOpen && (
-        <div className="border-t sm:hidden">
+        <div className="border-t border-ledger-rule sm:hidden">
           {user && !isAuthPage && (
             <div className="space-y-1 pb-3 pt-2">
               {navItems.map((item) => {
@@ -137,8 +137,8 @@ export function Navbar() {
                     className={cn(
                       'flex items-center px-4 py-2 text-base font-medium',
                       isActive
-                        ? 'border-l-4 border-indigo-500 bg-indigo-50 text-indigo-700'
-                        : 'border-l-4 border-transparent text-gray-600 hover:bg-gray-50'
+                        ? 'border-l-4 border-ledger-teal bg-ledger-teal-light text-ledger-teal-dark'
+                        : 'border-l-4 border-transparent text-ledger-ink-muted hover:bg-ledger-paper'
                     )}
                   >
                     <item.icon className="mr-3 h-5 w-5" />
@@ -148,13 +148,13 @@ export function Navbar() {
               })}
             </div>
           )}
-          <div className="border-t px-4 py-3">
+          <div className="border-t border-ledger-rule px-4 py-3">
             {user ? (
               <div className="space-y-3">
-                <span className="block text-sm text-gray-700">{user.email}</span>
+                <span className="block text-sm text-ledger-ink-muted">{user.email}</span>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="inline-flex items-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
@@ -163,12 +163,12 @@ export function Navbar() {
             ) : (
               !isAuthPage && (
                 <div className="flex flex-col gap-3">
-                  <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900">
+                  <Link href="/login" className="text-sm font-medium text-ledger-ink-muted hover:text-ledger-ink">
                     Sign in
                   </Link>
                   <Link
                     href="/signup"
-                    className="inline-flex w-fit items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                    className="inline-flex w-fit items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                   >
                     Get started
                   </Link>
