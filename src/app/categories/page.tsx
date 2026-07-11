@@ -141,20 +141,6 @@ function CategoriesPageInner() {
     );
   }
 
-  if (groups.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">
-            You&apos;re not in any groups yet. Create one on the{' '}
-            <a href="/groups" className="text-indigo-600 hover:underline">Groups</a> page first.
-          </p>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-ledger-paper">
       <Navbar />
