@@ -225,8 +225,13 @@ create policy "Users can update their own row" on public.users
   for update using (id = auth.uid());
 
 -- ---- groups ---------------------------------------------------------------
+-- `or created_by = auth.uid()` matters: right after INSERT, PostgREST needs
+-- to SELECT the new row back to return it to the client, but the creator
+-- isn't a group_members row yet (that insert happens next, client-side) —
+-- without this clause, is_group_member() alone would reject that read-back
+-- and the insert would surface as an RLS error even though it succeeded.
 create policy "Members can view their groups" on public.groups
-  for select using (public.is_group_member(id));
+  for select using (public.is_group_member(id) or created_by = auth.uid());
 
 create policy "Any authenticated user can create a group" on public.groups
   for insert with check (created_by = auth.uid());
