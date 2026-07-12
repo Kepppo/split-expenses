@@ -182,9 +182,18 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-ledger-paper">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Dashboard</h1>
-          <p className="mt-2 text-ledger-ink-muted">Overview of your shared expenses</p>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Dashboard</h1>
+            <p className="mt-2 text-ledger-ink-muted">Overview of your shared expenses</p>
+          </div>
+          <Link
+            href="/expenses"
+            className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Expense
+          </Link>
         </div>
 
         {error && (
@@ -245,16 +254,7 @@ export default function DashboardPage() {
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <h2 className="font-serif text-xl font-semibold text-ledger-ink">Your Groups</h2>
-              <Link
-                href="/expenses"
-                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Expense
-              </Link>
-            </div>
+            <h2 className="font-serif text-xl font-semibold text-ledger-ink">Your Groups</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {summaries.map((summary) => {
                 const { group, members, myBalance, myTopCreditor } = summary;
