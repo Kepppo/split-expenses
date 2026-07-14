@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { Plus, Users, Check, X as XIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CURRENCIES } from '@/lib/utils';
 
 export default function GroupsPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function GroupsPage() {
   const [invites, setInvites] = useState<GroupInvite[]>([]);
   const [groupNamesByInvite, setGroupNamesByInvite] = useState<Record<string, string>>({});
   const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupCurrency, setNewGroupCurrency] = useState('USD');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +102,11 @@ export default function GroupsPage() {
 
     const { data: group, error: groupError } = await supabase
       .from('groups')
-      .insert({ name: newGroupName.trim(), created_by: user.id })
+      .insert({
+        name: newGroupName.trim(),
+        created_by: user.id,
+        currency: newGroupCurrency,
+      })
       .select()
       .single();
 
@@ -191,7 +197,7 @@ export default function GroupsPage() {
           </div>
         )}
 
-        <form onSubmit={createGroup} className="mb-8 flex gap-4">
+        <form onSubmit={createGroup} className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
             type="text"
             value={newGroupName}
@@ -199,6 +205,18 @@ export default function GroupsPage() {
             placeholder="New group name (e.g., Apartment, Iceland Trip)"
             className="flex-1 rounded-sm border border-ledger-rule px-4 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
           />
+          <select
+            value={newGroupCurrency}
+            onChange={(e) => setNewGroupCurrency(e.target.value)}
+            aria-label="Currency"
+            className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code} — {c.label}
+              </option>
+            ))}
+          </select>
           <button
             type="submit"
             className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"

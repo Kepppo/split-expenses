@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { formatMoney } from '@/lib/utils';
 
 interface LedgerCardProps {
   title?: string;
@@ -9,14 +10,18 @@ interface LedgerCardProps {
 }
 
 /** A card styled like a torn ledger page: perforated top edge, optional ruled lines. */
-export function LedgerCard({ title, eyebrow, children, className = '', ruled = true }: LedgerCardProps) {
+export function LedgerCard({ title, eyebrow, children, className = '', ruled = false }: LedgerCardProps) {
   return (
-    <div className={`relative rounded-sm px-6 pb-6 pt-6 ${ruled ? 'ledger-ruled' : 'bg-ledger-card'} ${className}`}>
-      <div className="ledger-perforation">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <span key={i} />
-        ))}
-      </div>
+    <div
+      className={cnLedgerCard(ruled, className)}
+    >
+      {ruled && (
+        <div className="ledger-perforation">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <span key={i} />
+          ))}
+        </div>
+      )}
       {eyebrow && (
         <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-ledger-ink-muted">{eyebrow}</p>
       )}
@@ -26,20 +31,37 @@ export function LedgerCard({ title, eyebrow, children, className = '', ruled = t
   );
 }
 
-/** A dollar amount set in mono, right-aligned. Balances are ink-colored by sign; pass `neutral` for plain amounts. */
-export function Money({ amount, neutral = false, className = '' }: { amount: number; neutral?: boolean; className?: string }) {
+function cnLedgerCard(ruled: boolean, className: string) {
+  const base = 'relative px-6 pb-6 pt-6 shadow-card-sm';
+  if (ruled) return `${base} ledger-ruled ${className}`;
+  return `${base} rounded-lg bg-ledger-card border border-ledger-rule ${className}`;
+}
+
+/** A currency amount set in mono, right-aligned. Balances are colored by sign; pass `neutral` for plain amounts. */
+export function Money({
+  amount,
+  neutral = false,
+  currency = 'USD',
+  className = '',
+}: {
+  amount: number;
+  neutral?: boolean;
+  currency?: string;
+  className?: string;
+}) {
   if (neutral) {
     return (
       <span className={`font-mono font-medium tabular-nums text-ledger-ink ${className}`}>
-        ${Math.abs(amount).toFixed(2)}
+        {formatMoney(Math.abs(amount), currency)}
       </span>
     );
   }
   const color = amount > 0 ? 'text-ledger-teal' : amount < 0 ? 'text-ledger-red' : 'text-ledger-ink-muted';
-  const sign = amount > 0 ? '+' : amount < 0 ? '\u2212' : '';
+  const sign = amount > 0 ? '+' : amount < 0 ? '−' : '';
   return (
     <span className={`font-mono font-medium tabular-nums ${color} ${className}`}>
-      {sign}${Math.abs(amount).toFixed(2)}
+      {sign}
+      {formatMoney(Math.abs(amount), currency)}
     </span>
   );
 }

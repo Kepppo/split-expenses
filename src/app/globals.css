@@ -2,21 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   DESIGN TOKENS — semantic, theme-aware (light + dark)
+   Colors are space-separated RGB triplets so Tailwind can apply opacity
+   via `rgb(var(--token) / <alpha-value>)`.
+   ========================================================================= */
 :root {
-  --background: #eef1f0;
-  --foreground: #1b2a32;
+  --background: 244 246 245;   /* #F4F6F5 */
+  --surface: 255 255 255;      /* #FFFFFF */
+  --surface-2: 247 248 246;    /* #F7F8F6 */
+
+  --ledger-paper: 244 246 245;
+  --ledger-card: 255 255 255;
+  --ledger-rule: 226 230 228;  /* #E2E6E4 */
+  --ledger-ink: 27 42 50;      /* #1B2A32 */
+  --ledger-ink-muted: 95 106 102; /* #5F6A66 */
+
+  --ledger-teal: 47 111 98;        /* #2F6F62 */
+  --ledger-teal-light: 225 245 238;/* #E1F5EE */
+  --ledger-teal-dark: 31 78 68;    /* #1F4E44 */
+
+  --ledger-red: 178 58 46;        /* #B23A2E */
+  --ledger-red-light: 250 236 231;/* #FAECE7 */
+
+  --ledger-brass: 184 146 90;     /* #B8925A */
+
+  --ring: 47 111 98;
+  --shadow-color: 16 30 28;
   color-scheme: light;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
+.dark {
+  --background: 15 20 19;     /* #0F1413 */
+  --surface: 22 28 27;        /* #161C1B */
+  --surface-2: 27 34 33;      /* #1B2221 */
+
+  --ledger-paper: 15 20 19;
+  --ledger-card: 22 28 27;
+  --ledger-rule: 38 48 46;    /* #26302E */
+  --ledger-ink: 232 237 235;  /* #E8EDEB */
+  --ledger-ink-muted: 154 168 163; /* #9AA8A3 */
+
+  --ledger-teal: 62 140 124;      /* #3E8C7C */
+  --ledger-teal-light: 22 48 43;  /* #16302B */
+  --ledger-teal-dark: 95 179 161; /* #5FB3A1 */
+
+  --ledger-red: 226 104 92;       /* #E2685C */
+  --ledger-red-light: 42 24 22;   /* #2A1816 */
+
+  --ledger-brass: 210 169 104;    /* #D2A968 */
+
+  --ring: 62 140 124;
+  --shadow-color: 0 0 0;
+  color-scheme: dark;
 }
 
-/* Ruled ledger paper background for cards — a hairline every 27px, like a real ledger page */
+body {
+  color: rgb(var(--ledger-ink));
+  background: rgb(var(--ledger-paper));
+}
+
+/* Consistent, accessible focus ring everywhere */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--ring) / 0.35);
+  border-radius: 8px;
+}
+
+/* Ruled ledger paper background — reserved for hero/empty moments */
 .ledger-ruled {
-  background-color: #f7f8f6;
-  background-image: repeating-linear-gradient(#f7f8f6 0 27px, #dce1de 27px 28px);
+  background-color: rgb(var(--ledger-card));
+  background-image: repeating-linear-gradient(rgb(var(--ledger-card)) 0 27px, rgb(var(--ledger-rule)) 27px 28px);
   background-position: 0 56px;
 }
 
@@ -36,5 +92,33 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background: #eef1f0;
+  background: rgb(var(--ledger-paper));
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--surface-2)) 25%,
+    rgb(var(--ledger-rule) / 0.6) 37%,
+    rgb(var(--surface-2)) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+/* Reserve space on mobile so the fixed bottom tab bar never covers content */
+@media (max-width: 767px) {
+  body { padding-bottom: 4rem; }
 }

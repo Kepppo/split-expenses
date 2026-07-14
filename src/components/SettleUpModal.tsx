@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AppUser } from '@/types';
 import { X } from 'lucide-react';
+import { currencySymbol } from '@/lib/utils';
 
 interface SettleUpModalProps {
   groupId: string;
@@ -11,6 +12,7 @@ interface SettleUpModalProps {
   members: AppUser[];
   defaultPayTo?: string;
   defaultAmount?: number;
+  currency?: string;
   onClose: () => void;
   onSettled: () => void;
 }
@@ -21,6 +23,7 @@ export function SettleUpModal({
   members,
   defaultPayTo,
   defaultAmount,
+  currency = 'USD',
   onClose,
   onSettled,
 }: SettleUpModalProps) {
@@ -104,7 +107,9 @@ export function SettleUpModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ledger-ink">Amount</label>
+            <label className="block text-sm font-medium text-ledger-ink">
+              Amount <span className="text-ledger-ink-muted">({currencySymbol(currency)})</span>
+            </label>
             <input
               type="number"
               step="0.01"

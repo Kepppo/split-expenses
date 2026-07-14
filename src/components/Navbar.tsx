@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { AppUser } from '@/types';
 import { Avatar } from '@/components/Avatar';
-import { Wallet, Users, Tag, Receipt, ScrollText, LogOut, Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { Wallet, Users, Tag, Receipt, ScrollText, Settings, LogOut } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Wallet },
@@ -15,13 +16,13 @@ const navItems = [
   { href: '/categories', label: 'Categories', icon: Tag },
   { href: '/expenses', label: 'Expenses', icon: Receipt },
   { href: '/activity', label: 'Activity', icon: ScrollText },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<{ email?: string; id?: string } | null>(null);
   const [profile, setProfile] = useState<AppUser | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -45,67 +46,68 @@ export function Navbar() {
     });
   }, [user?.id]);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isActive = (href: string) => pathname === href;
 
   return (
-    <nav className="border-b border-ledger-rule bg-ledger-card">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
-          <div className="flex">
-            <div className="flex flex-shrink-0 items-center">
-              <Link href="/" className="font-serif text-xl font-semibold text-ledger-ink">
-                SplitExpenses
-              </Link>
-            </div>
+    <>
+      <nav className="sticky top-0 z-40 border-b border-ledger-rule bg-ledger-card/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="font-serif text-xl font-semibold tracking-tight text-ledger-ink">
+              Split<span className="text-ledger-teal">Expenses</span>
+            </Link>
+
             {user && !isAuthPage && (
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
+              <div className="ml-2 hidden items-center gap-1 md:flex">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'relative inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      isActive(item.href) ? 'text-ledger-teal' : 'text-ledger-ink-muted hover:text-ledger-ink'
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                    <span
                       className={cn(
-                        'inline-flex items-center px-1 pt-1 text-sm font-medium',
-                        isActive
-                          ? 'border-b-2 border-ledger-teal text-ledger-ink'
-                          : 'border-b-2 border-transparent text-ledger-ink-muted hover:border-ledger-rule hover:text-ledger-ink'
+                        'absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-ledger-teal transition-opacity',
+                        isActive(item.href) ? 'opacity-100' : 'opacity-0'
                       )}
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                    />
+                  </Link>
+                ))}
               </div>
             )}
           </div>
 
-          <div className="hidden sm:flex sm:items-center sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             {user ? (
-              <div className="flex items-center gap-3">
-                {profile && <Avatar user={profile} size="sm" />}
-                <span className="text-sm text-ledger-ink-muted">{user.email}</span>
+              <>
+                <Link href="/settings" className="hidden items-center gap-2 sm:flex">
+                  {profile && <Avatar user={profile} size="sm" />}
+                  <span className="max-w-[12rem] truncate text-sm text-ledger-ink-muted">{user.email}</span>
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                  aria-label="Log out"
+                  className="inline-flex items-center gap-2 rounded-md border border-ledger-rule bg-ledger-card px-3 py-2 text-sm font-medium text-ledger-ink transition-colors hover:bg-ledger-paper"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
-              </div>
+              </>
             ) : (
               !isAuthPage && (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <Link
                     href="/login"
                     className="text-sm font-medium text-ledger-ink-muted hover:text-ledger-ink"
@@ -114,7 +116,7 @@ export function Navbar() {
                   </Link>
                   <Link
                     href="/signup"
-                    className="rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                    className="rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ledger-teal-dark"
                   >
                     Get started
                   </Link>
@@ -122,76 +124,27 @@ export function Navbar() {
               )
             )}
           </div>
+        </div>
+      </nav>
 
-          {/* Mobile menu toggle */}
-          <div className="flex items-center sm:hidden">
-            <button
-              onClick={() => setMobileOpen((v) => !v)}
-              className="inline-flex items-center justify-center rounded-sm p-2 text-ledger-ink-muted hover:bg-ledger-paper hover:text-ledger-ink"
-              aria-label="Toggle menu"
-              aria-expanded={mobileOpen}
+      {/* Mobile bottom tab bar */}
+      {user && !isAuthPage && (
+        <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-ledger-rule bg-ledger-card/95 backdrop-blur md:hidden">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium transition-colors',
+                isActive(item.href) ? 'text-ledger-teal' : 'text-ledger-ink-muted'
+              )}
             >
-              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu panel */}
-      {mobileOpen && (
-        <div className="border-t border-ledger-rule sm:hidden">
-          {user && !isAuthPage && (
-            <div className="space-y-1 pb-3 pt-2">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center px-4 py-2 text-base font-medium',
-                      isActive
-                        ? 'border-l-4 border-ledger-teal bg-ledger-teal-light text-ledger-teal-dark'
-                        : 'border-l-4 border-transparent text-ledger-ink-muted hover:bg-ledger-paper'
-                    )}
-                  >
-                    <item.icon className="mr-3 h-5 w-5" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-          <div className="border-t border-ledger-rule px-4 py-3">
-            {user ? (
-              <div className="space-y-3">
-                <span className="block text-sm text-ledger-ink-muted">{user.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            ) : (
-              !isAuthPage && (
-                <div className="flex flex-col gap-3">
-                  <Link href="/login" className="text-sm font-medium text-ledger-ink-muted hover:text-ledger-ink">
-                    Sign in
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="inline-flex w-fit items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
-                  >
-                    Get started
-                  </Link>
-                </div>
-              )
-            )}
-          </div>
-        </div>
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       )}
-    </nav>
+    </>
   );
 }

@@ -43,6 +43,7 @@ create trigger on_auth_user_created
 create table if not exists public.groups (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
+  currency text not null default 'USD' check (currency in ('USD','EUR','GBP','JPY','MXN','INR','AUD','CAD','CHF','SEK','BRL','TRY')),
   created_by uuid references public.users not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -403,10 +404,23 @@ returns trigger as $$
 declare
   _group_id uuid;
 begin
-  _group_id := case TG_TABLE_NAME
-    when 'expense_splits' then public.expense_group_id(coalesce(new.expense_id, old.expense_id))
-    else coalesce(new.group_id, old.group_id)
-  end;
+  -- Resolve the owning group from the row type that this trigger is firing on.
+  -- Access expense_id ONLY inside the expense_splits branch, otherwise the
+  -- record field reference fails on tables that don't have that column
+  -- (e.g. categories), producing "record new has no field expense_id".
+  if TG_TABLE_NAME = 'expense_splits' then
+    if (TG_OP = 'DELETE') then
+      _group_id := public.expense_group_id(old.expense_id);
+    else
+      _group_id := public.expense_group_id(new.expense_id);
+    end if;
+  else
+    if (TG_OP = 'DELETE') then
+      _group_id := old.group_id;
+    else
+      _group_id := new.group_id;
+    end if;
+  end if;
 
   if (TG_OP = 'DELETE') then
     insert into public.activity_log (group_id, actor_id, action, entity_type, entity_id, changes_json)

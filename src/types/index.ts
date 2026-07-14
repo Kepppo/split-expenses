@@ -9,6 +9,7 @@ export interface AppUser {
 export interface Group {
   id: string;
   name: string;
+  currency: string;
   created_by: string;
   created_at: string;
 }

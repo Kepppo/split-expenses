@@ -1,22 +1,24 @@
 import type { Metadata } from 'next';
-import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Fraunces, IBM_Plex_Mono, Inter } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { ToastProvider } from '@/components/Toast';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['500', '600'],
+  weight: ['500', '600', '700'],
   variable: '--font-fraunces',
 });
 
-const plexSans = IBM_Plex_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-sans',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
 });
 
 const plexMono = IBM_Plex_Mono({
   subsets: ['latin'],
-  weight: ['500'],
+  weight: ['500', '600'],
   variable: '--font-plex-mono',
 });
 
@@ -25,15 +27,27 @@ export const metadata: Metadata = {
   description: 'Personal expense sharing app',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Runs before paint to avoid a light/dark flash.
+const themeScript = `
+(function() {
+  try {
+    var t = localStorage.getItem('theme');
+    if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (t === 'dark') document.documentElement.classList.add('dark');
+  } catch (e) {}
+})();
+`;
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} font-sans`}>
-        {children}
+    <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="font-sans">
+        <ThemeProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

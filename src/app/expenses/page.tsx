@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AppUser, Group, Category, Expense, ExpenseSplit, SplitType } from '@/types';
 import { splitEqually } from '@/lib/balances';
+import { formatMoney } from '@/lib/utils';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar } from '@/components/Avatar';
@@ -236,6 +237,26 @@ function ExpensesPageInner() {
     members.find((m) => m.id === id) || { id, email: '', name: 'Unknown', avatar_url: null, created_at: '' };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || 'Uncategorized';
   const getCategoryColor = (id: string | null) => categories.find((c) => c.id === id)?.color || '#ccc';
+  const groupCurrency = groups.find((g) => g.id === groupId)?.currency || 'USD';
+
+  const includedIds = members.filter((m) => includedMembers[m.id]).map((m) => m.id);
+  const amountNum = parseFloat(amount) || 0;
+  const allocated = includedIds.reduce((sum, id) => sum + (parseFloat(splitValues[id] || '0') || 0), 0);
+  const remaining =
+    splitType === 'percentage' ? Math.round((100 - allocated) * 100) / 100 : Math.round((amountNum - allocated) * 100) / 100;
+
+  const distributeEvenly = () => {
+    if (includedIds.length === 0) return;
+    const next = { ...splitValues };
+    if (splitType === 'percentage') {
+      const each = (100 / includedIds.length).toFixed(2);
+      includedIds.forEach((id) => (next[id] = each));
+    } else {
+      const shares = splitEqually(amountNum, includedIds);
+      includedIds.forEach((id) => (next[id] = (shares[id] ?? 0).toFixed(2)));
+    }
+    setSplitValues(next);
+  };
 
   if (loading) {
     return (
@@ -400,6 +421,27 @@ function ExpensesPageInner() {
               </div>
             </div>
 
+            {splitType !== 'equal' && (
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <span
+                  className={`text-sm font-medium ${
+                    Math.abs(remaining) < 0.01 ? 'text-ledger-teal' : 'text-ledger-red'
+                  }`}
+                >
+                  {splitType === 'percentage'
+                    ? `Unallocated: ${remaining.toFixed(2)}%`
+                    : `Remaining: ${formatMoney(Math.abs(remaining), groupCurrency)}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={distributeEvenly}
+                  className="text-sm font-medium text-ledger-teal hover:text-ledger-teal-dark"
+                >
+                  Distribute evenly
+                </button>
+              </div>
+            )}
+
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
@@ -434,7 +476,7 @@ function ExpensesPageInner() {
                       <h3 className="font-serif text-lg font-semibold text-ledger-ink">{expense.description}</h3>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ledger-ink-muted">
-                      <Money amount={expense.amount} neutral />
+                      <Money amount={expense.amount} currency={groupCurrency} neutral />
                       <span>Paid by {getUserName(expense.paid_by)}</span>
                       <span>{getCategoryName(expense.category_id)}</span>
                       <span>{new Date(expense.date).toLocaleDateString()}</span>
@@ -443,7 +485,7 @@ function ExpensesPageInner() {
                       {expenseSplits.map((s) => (
                         <span key={s.id} className="inline-flex items-center gap-1.5">
                           <Avatar user={getUser(s.user_id)} size="sm" />
-                          {getUserName(s.user_id)}: <Money amount={s.amount} neutral />
+                           {getUserName(s.user_id)}: <Money amount={s.amount} currency={groupCurrency} neutral />
                         </span>
                       ))}
                     </div>

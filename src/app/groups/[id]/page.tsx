@@ -11,11 +11,13 @@ import { Avatar, AvatarStack } from '@/components/Avatar';
 import { SettleUpModal } from '@/components/SettleUpModal';
 import { Mail, UserMinus, HandCoins } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 
 export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
   const groupId = params.id as string;
+  const toast = useToast();
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
@@ -109,15 +111,25 @@ export default function GroupDetailPage() {
     setError(null);
     if (!inviteEmail.trim() || !currentUserId) return;
 
-    const { error: inviteError } = await supabase.from('group_invites').insert({
+    const { data: created, error: inviteError } = await supabase.from('group_invites').insert({
       group_id: groupId,
       email: inviteEmail.trim().toLowerCase(),
       invited_by: currentUserId,
-    });
+    }).select().single();
 
     if (inviteError) {
       setError(inviteError.message);
       return;
+    }
+
+    if (created) {
+      const url = `${window.location.origin}/invite/${created.id}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('Invite link copied to clipboard — share it anywhere');
+      } catch {
+        toast('Invite created');
+      }
     }
 
     setInviteEmail('');
@@ -216,7 +228,7 @@ export default function GroupDetailPage() {
                         <Avatar user={getUser(id)} size="sm" />
                         {id === currentUserId ? 'You' : getUserName(id)}
                       </span>
-                      <Money amount={balance} className="text-sm" />
+                      <Money amount={balance} currency={group.currency} className="text-sm" />
                     </div>
                   );
                 })}
@@ -238,7 +250,7 @@ export default function GroupDetailPage() {
                           {' owe'}{debt.from === currentUserId ? '' : 's'}{' '}
                           <strong>{debt.to === currentUserId ? 'you' : getUserName(debt.to)}</strong>
                           {' '}
-                          <Money amount={debt.amount} neutral />
+                          <Money amount={debt.amount} currency={group.currency} neutral />
                         </span>
                         {isMine && (
                           <button
@@ -266,7 +278,7 @@ export default function GroupDetailPage() {
                     <span className="text-ledger-ink">
                       {s.paid_by === currentUserId ? 'You' : getUserName(s.paid_by)} paid{' '}
                       {s.paid_to === currentUserId ? 'you' : getUserName(s.paid_to)}{' '}
-                      <Money amount={s.amount} neutral />
+                      <Money amount={s.amount} currency={group.currency} neutral />
                       {s.note ? ` — ${s.note}` : ''}
                     </span>
                     <span className="text-ledger-ink-muted">{new Date(s.date).toLocaleDateString()}</span>
@@ -310,14 +322,26 @@ export default function GroupDetailPage() {
               {invites.length > 0 && (
                 <div className="mt-4 space-y-2 border-t pt-4">
                   {invites.map((inv) => (
-                    <div key={inv.id} className="flex items-center justify-between text-sm text-ledger-ink-muted">
-                      <span className="flex items-center">
-                        <Mail className="mr-1.5 h-3.5 w-3.5" />
-                        {inv.email} (pending)
+                    <div key={inv.id} className="flex items-center justify-between gap-2 text-sm text-ledger-ink-muted">
+                      <span className="flex min-w-0 items-center">
+                        <Mail className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{inv.email} (pending)</span>
                       </span>
-                      <button onClick={() => cancelInvite(inv.id)} className="text-xs text-ledger-red hover:underline">
-                        Cancel
-                      </button>
+                      <span className="flex shrink-0 items-center gap-3">
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/invite/${inv.id}`;
+                            navigator.clipboard?.writeText(url);
+                            toast('Invite link copied');
+                          }}
+                          className="text-xs text-ledger-teal hover:underline"
+                        >
+                          Copy link
+                        </button>
+                        <button onClick={() => cancelInvite(inv.id)} className="text-xs text-ledger-red hover:underline">
+                          Cancel
+                        </button>
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -350,6 +374,7 @@ export default function GroupDetailPage() {
           members={memberUsers}
           defaultPayTo={prefill.to}
           defaultAmount={prefill.amount}
+          currency={group.currency}
           onClose={() => setShowSettleModal(false)}
           onSettled={fetchData}
         />

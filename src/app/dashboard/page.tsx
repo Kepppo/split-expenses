@@ -26,6 +26,7 @@ interface RecentEvent {
   groupName: string;
   label: string;
   amount: number;
+  currency: string;
   createdAt: string;
 }
 
@@ -133,6 +134,7 @@ export default function DashboardPage() {
             groupName: group.name,
             label: `${getName(e.paid_by)} added "${e.description}" in ${group.name}`,
             amount: e.amount,
+            currency: group.currency,
             createdAt: e.created_at,
           });
         }
@@ -144,6 +146,7 @@ export default function DashboardPage() {
             groupName: group.name,
             label: `${getName(s.paid_by)} paid ${getName(s.paid_to)} in ${group.name}`,
             amount: s.amount,
+            currency: group.currency,
             createdAt: s.created_at,
           });
         }
@@ -273,7 +276,7 @@ export default function DashboardPage() {
                         </div>
                         <AvatarStack users={members} max={3} />
                       </div>
-                      <Money amount={myBalance} className="mt-3 block text-2xl" />
+                      <Money amount={myBalance} currency={summary.group.currency} className="mt-3 block text-2xl" />
                       <p className="mt-1 text-sm text-ledger-ink-muted">
                         {myBalance >= 0 ? 'owed to you' : 'you owe'}
                       </p>
@@ -314,7 +317,7 @@ export default function DashboardPage() {
                       <p className="truncate text-sm text-ledger-ink">{event.label}</p>
                       <p className="text-xs text-ledger-ink-muted">{timeAgo(event.createdAt)}</p>
                     </div>
-                    <Money amount={event.amount} neutral className="shrink-0 text-sm" />
+                    <Money amount={event.amount} currency={event.currency} neutral className="shrink-0 text-sm" />
                   </Link>
                 ))}
                 {recentEvents.length === 0 && (
@@ -333,6 +336,7 @@ export default function DashboardPage() {
           members={settleTarget.members}
           defaultPayTo={settleTarget.myTopCreditor?.id}
           defaultAmount={settleTarget.myTopCreditor?.amount}
+          currency={settleTarget.group.currency}
           onClose={() => setSettleTarget(null)}
           onSettled={fetchData}
         />
