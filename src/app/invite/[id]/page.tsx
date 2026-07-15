@@ -64,7 +64,7 @@ export default function AcceptInvitePage({ params }: { params: { id: string } })
             <p className="mt-1 text-ledger-ink-muted">{message || 'This invite may have expired or already been used.'}</p>
             <button
               onClick={() => router.push('/dashboard')}
-              className="mt-6 rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+              className="mt-6 rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
             >
               Go to dashboard
             </button>

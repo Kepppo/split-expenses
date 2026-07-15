@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/Skeleton';
 import { Avatar } from '@/components/Avatar';
 import { Receipt, HandCoins, Tag, Users, ScrollText, Trash2, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Select } from '@/components/Select';
 
 const ENTITY_ICON: Record<string, typeof Receipt> = {
   expenses: Receipt,
@@ -115,10 +116,10 @@ export default function ActivityPage() {
             <p className="mt-2 text-ledger-ink-muted">A readable trail of everything that happened</p>
           </div>
           {groups.length > 0 && (
-            <select
+            <Select
               value={filterGroup}
               onChange={(e) => setFilterGroup(e.target.value)}
-              className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+              className="sm:w-56"
             >
               <option value="">All groups</option>
               {groups.map((g) => (
@@ -126,11 +127,11 @@ export default function ActivityPage() {
                   {g.name}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
         </div>
 
-        {error && <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>}
+        {error && <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>}
 
         {loading ? (
           <div className="space-y-3">

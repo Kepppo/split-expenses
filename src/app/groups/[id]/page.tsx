@@ -197,13 +197,13 @@ export default function GroupDetailPage() {
           <div className="flex gap-3">
             <Link
               href={`/expenses?group=${groupId}`}
-              className="inline-flex items-center rounded-sm border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
+              className="inline-flex items-center rounded-md border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
             >
               View Expenses
             </Link>
             <button
               onClick={() => openSettleModal()}
-              className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+              className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
             >
               <HandCoins className="mr-2 h-4 w-4" />
               Settle Up
@@ -212,12 +212,12 @@ export default function GroupDetailPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
         )}
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-8">
-            <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
               <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">Balances</h2>
               <div className="space-y-3">
                 {memberIds.map((id) => {
@@ -235,7 +235,7 @@ export default function GroupDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
               <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">Who owes whom</h2>
               {debts.length === 0 ? (
                 <p className="text-sm text-ledger-ink-muted">Books are balanced — nothing owed either way.</p>
@@ -270,7 +270,7 @@ export default function GroupDetailPage() {
               )}
             </div>
 
-            <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
               <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">Settlement history</h2>
               <div className="space-y-3">
                 {settlements.map((s) => (
@@ -292,7 +292,7 @@ export default function GroupDetailPage() {
           </div>
 
           <div className="space-y-8">
-            <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
               <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">Members</h2>
               <div className="space-y-3">
                 {members.map((m) => (
@@ -309,7 +309,7 @@ export default function GroupDetailPage() {
                     {m.role !== 'owner' && (
                       <button
                         onClick={() => removeMember(m.id)}
-                        className="rounded-sm p-1.5 text-ledger-ink-muted hover:bg-ledger-red-light hover:text-ledger-red"
+                        className="rounded-md p-1.5 text-ledger-ink-muted hover:bg-ledger-red-light hover:text-ledger-red"
                         title="Remove member"
                       >
                         <UserMinus className="h-4 w-4" />
@@ -353,11 +353,11 @@ export default function GroupDetailPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="Invite by email"
-                  className="flex-1 rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="flex-1 rounded-md border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
                 <button
                   type="submit"
-                  className="rounded-sm bg-ledger-teal px-3 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                  className="rounded-md bg-ledger-teal px-3 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                 >
                   Invite
                 </button>

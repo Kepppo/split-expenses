@@ -50,13 +50,13 @@ export default function Home() {
             <div className="mx-auto mt-8 max-w-md sm:flex sm:justify-center">
               <Link
                 href="/signup"
-                className="flex items-center justify-center rounded-sm border border-transparent bg-ledger-teal px-8 py-3 text-base font-medium text-white hover:bg-ledger-teal-dark md:py-4 md:px-10 md:text-lg"
+                className="flex items-center justify-center rounded-md border border-transparent bg-ledger-teal px-8 py-3 text-base font-medium text-white hover:bg-ledger-teal-dark md:py-4 md:px-10 md:text-lg"
               >
                 Get started
               </Link>
               <Link
                 href="/login"
-                className="mt-3 flex items-center justify-center rounded-sm border border-ledger-rule bg-ledger-card px-8 py-3 text-base font-medium text-ledger-teal hover:bg-ledger-paper sm:mt-0 sm:ml-3 md:py-4 md:px-10 md:text-lg"
+                className="mt-3 flex items-center justify-center rounded-md border border-ledger-rule bg-ledger-card px-8 py-3 text-base font-medium text-ledger-teal hover:bg-ledger-paper sm:mt-0 sm:ml-3 md:py-4 md:px-10 md:text-lg"
               >
                 Sign in
               </Link>

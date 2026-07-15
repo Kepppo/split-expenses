@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Categories – Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ledger: {
+              paper: 'rgb(var(--ledger-paper) / <alpha-value>)',
+              card: 'rgb(var(--ledger-card) / <alpha-value>)',
+              rule: 'rgb(var(--ledger-rule) / <alpha-value>)',
+              ink: 'rgb(var(--ledger-ink) / <alpha-value>)',
+              'ink-muted': 'rgb(var(--ledger-ink-muted) / <alpha-value>)',
+              teal: 'rgb(var(--ledger-teal) / <alpha-value>)',
+              'teal-light': 'rgb(var(--ledger-teal-light) / <alpha-value>)',
+              'teal-dark': 'rgb(var(--ledger-teal-dark) / <alpha-value>)',
+              red: 'rgb(var(--ledger-red) / <alpha-value>)',
+              'red-light': 'rgb(var(--ledger-red-light) / <alpha-value>)',
+              brass: 'rgb(var(--ledger-brass) / <alpha-value>)',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Fraunces', 'serif'],
+          },
+          borderRadius: { lg: '16px', md: '12px', sm: '10px' },
+          boxShadow: {
+            card: '0 1px 2px rgb(var(--shadow-color) / 0.04), 0 8px 24px -12px rgb(var(--shadow-color) / 0.18)',
+            'card-sm': '0 1px 2px rgb(var(--shadow-color) / 0.06)',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --ledger-paper: 244 246 245;
+      --ledger-card: 255 255 255;
+      --ledger-rule: 226 230 228;
+      --ledger-ink: 27 42 50;
+      --ledger-ink-muted: 95 106 102;
+      --ledger-teal: 47 111 98;
+      --ledger-teal-light: 225 245 238;
+      --ledger-teal-dark: 31 78 68;
+      --ledger-red: 178 58 46;
+      --ledger-red-light: 250 236 231;
+      --ledger-brass: 184 146 90;
+      --ring: 47 111 98;
+      --shadow-color: 16 30 28;
+    }
+    body {
+      color: rgb(var(--ledger-ink));
+      background: rgb(var(--ledger-paper));
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgb(var(--ring) / 0.35);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-ledger-paper">
+
+  <!-- Page header -->
+  <header class="border-b border-ledger-rule bg-ledger-card">
+    <div class="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+      <span class="font-serif text-lg font-semibold text-ledger-ink">SplitExpenses</span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Title + group selector -->
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="font-serif text-3xl font-semibold text-ledger-ink">Categories</h1>
+        <p class="mt-2 text-ledger-ink-muted">Organize expenses by category with default split rules</p>
+      </div>
+      <!-- Select component (new) -->
+      <div class="relative w-full sm:w-64">
+        <select class="w-full appearance-none cursor-pointer rounded-md border border-ledger-rule bg-ledger-surface-2 px-3.5 py-2 pr-9 text-sm text-ledger-ink transition-all duration-200 hover:border-ledger-ink-muted hover:shadow-sm focus-visible:border-ledger-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-teal/40 focus-visible:ring-offset-2">
+          <option>Housemates</option>
+          <option>Trip to Spain</option>
+          <option>Office Lunch</option>
+        </select>
+        <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ledger-ink-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <!-- Add Category form (NEW design) -->
+    <form class="mb-8 rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
+
+        <!-- Name -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ledger-ink">Name</label>
+          <input
+            type="text"
+            placeholder="e.g., Groceries"
+            class="h-10 w-full rounded-md border border-ledger-rule bg-ledger-surface-2 px-3.5 text-sm transition-all duration-200 hover:border-ledger-ink-muted focus-visible:border-ledger-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-teal/40 focus-visible:ring-offset-2"
+          />
+        </div>
+
+        <!-- Color -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ledger-ink">Color</label>
+          <div class="flex h-10 flex-wrap items-center gap-2.5">
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-ledger-ink ring-2 ring-ledger-ink/20 transition-all duration-150 hover:scale-110" style="background-color: #EF4444" aria-label="Red"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #F59E0B" aria-label="Amber"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #10B981" aria-label="Emerald"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #3B82F6" aria-label="Blue"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #6366F1" aria-label="Indigo"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #8B5CF6" aria-label="Violet"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #EC4899" aria-label="Pink"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #F97316" aria-label="Orange"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #14B8A6" aria-label="Teal"></button>
+            <button type="button" class="h-8 w-8 rounded-full border-2 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #06B6D4" aria-label="Cyan"></button>
+          </div>
+        </div>
+
+        <!-- Default Split -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ledger-ink">Default Split</label>
+          <div class="relative">
+            <select class="h-10 w-full appearance-none cursor-pointer rounded-md border border-ledger-rule bg-ledger-surface-2 px-3.5 pr-9 text-sm text-ledger-ink transition-all duration-200 hover:border-ledger-ink-muted hover:shadow-sm focus-visible:border-ledger-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-teal/40 focus-visible:ring-offset-2">
+              <option>Equal Split</option>
+              <option>Percentage</option>
+              <option>Fixed Amount</option>
+              <option>Custom</option>
+            </select>
+            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ledger-ink-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <!-- Button -->
+        <div>
+          <button type="button" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-ledger-teal px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-ledger-teal-dark hover:shadow-sm sm:w-auto">
+            <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add Category
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Category cards -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+      <div class="flex items-center justify-between rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card-sm">
+        <div class="flex items-center">
+          <div class="h-4 w-4 rounded-full" style="background-color: #EF4444"></div>
+          <div class="ml-4">
+            <h3 class="font-serif text-lg font-semibold text-ledger-ink">Groceries</h3>
+            <p class="text-sm text-ledger-ink-muted">Default: Equal Split</p>
+          </div>
+        </div>
+        <button class="rounded-md p-2 text-ledger-red transition-colors hover:bg-ledger-red-light" aria-label="Delete category">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card-sm">
+        <div class="flex items-center">
+          <div class="h-4 w-4 rounded-full" style="background-color: #3B82F6"></div>
+          <div class="ml-4">
+            <h3 class="font-serif text-lg font-semibold text-ledger-ink">Transport</h3>
+            <p class="text-sm text-ledger-ink-muted">Default: Fixed Amount</p>
+          </div>
+        </div>
+        <button class="rounded-md p-2 text-ledger-red transition-colors hover:bg-ledger-red-light" aria-label="Delete category">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card-sm">
+        <div class="flex items-center">
+          <div class="h-4 w-4 rounded-full" style="background-color: #10B981"></div>
+          <div class="ml-4">
+            <h3 class="font-serif text-lg font-semibold text-ledger-ink">Dining Out</h3>
+            <p class="text-sm text-ledger-ink-muted">Default: Percentage</p>
+          </div>
+        </div>
+        <button class="rounded-md p-2 text-ledger-red transition-colors hover:bg-ledger-red-light" aria-label="Delete category">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>

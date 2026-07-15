@@ -6,6 +6,7 @@ import { Category, Group } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { Plus, Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Select } from '@/components/Select';
 
 const COLORS = [
   '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1',
@@ -150,67 +151,68 @@ function CategoriesPageInner() {
             <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Categories</h1>
             <p className="mt-2 text-ledger-ink-muted">Organize expenses by category with default split rules</p>
           </div>
-          <select
+          <Select
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
-            className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+            className="w-full sm:w-64"
           >
             {groups.map((g) => (
               <option key={g.id} value={g.id}>{g.name}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
+          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">
             {error}
           </div>
         )}
 
-        <form onSubmit={addCategory} className="mb-8 rounded-sm bg-ledger-card p-6 border border-ledger-rule">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <form onSubmit={addCategory} className="mb-8 rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
             <div>
-              <label className="block text-sm font-medium text-ledger-ink">Name</label>
+              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Groceries"
-                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="h-10 w-full rounded-md border border-ledger-rule bg-ledger-surface-2 px-3.5 text-sm transition-all duration-200 hover:border-ledger-ink-muted focus-visible:border-ledger-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-teal/40 focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-ledger-ink">Color</label>
-              <div className="mt-1 flex gap-2">
+              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Color</label>
+              <div className="flex h-10 flex-wrap items-center gap-2.5">
                 {COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`h-8 w-8 rounded-full border-2 ${
-                      color === c ? 'border-ledger-ink' : 'border-transparent'
+                    className={`h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110 ${
+                      color === c ? 'border-ledger-ink ring-2 ring-ledger-ink/20' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: c }}
+                    aria-label={c}
                   />
                 ))}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-ledger-ink">Default Split</label>
-              <select
+              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Default Split</label>
+              <Select
                 value={splitType}
                 onChange={(e) => setSplitType(e.target.value as Category['default_split_type'])}
-                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="h-10"
               >
                 {SPLIT_TYPES.map((st) => (
                   <option key={st.value} value={st.value}>{st.label}</option>
                 ))}
-              </select>
+              </Select>
             </div>
-            <div className="flex items-end">
+            <div>
               <button
                 type="submit"
-                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md bg-ledger-teal px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-ledger-teal-dark hover:shadow-sm sm:w-auto"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Category
@@ -221,7 +223,7 @@ function CategoriesPageInner() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div key={category.id} className="flex items-center justify-between rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card-sm">
               <div className="flex items-center">
                 <div
                   className="h-4 w-4 rounded-full"
@@ -236,7 +238,8 @@ function CategoriesPageInner() {
               </div>
               <button
                 onClick={() => deleteCategory(category.id)}
-                className="rounded-sm p-2 text-ledger-red hover:bg-ledger-red-light"
+                className="rounded-md p-2 text-ledger-red transition-colors hover:bg-ledger-red-light"
+                aria-label="Delete category"
               >
                 <Trash2 className="h-5 w-5" />
               </button>

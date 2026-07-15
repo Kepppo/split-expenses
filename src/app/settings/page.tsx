@@ -126,13 +126,13 @@ export default function SettingsPage() {
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-sm border border-ledger-rule py-2 pl-9 pr-3 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="block w-full rounded-md border border-ledger-rule py-2 pl-9 pr-3 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark disabled:opacity-50"
+                className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save'}
               </button>

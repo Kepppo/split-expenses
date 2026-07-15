@@ -10,7 +10,7 @@ interface EmptyStateProps {
 }
 
 const ACTION_CLASS =
-  'mt-5 inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark';
+  'mt-5 inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark';
 
 /** Friendly empty state with icon, copy, and a single primary action. */
 export function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {

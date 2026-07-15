@@ -31,10 +31,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-ledger-paper px-4">
-      <div className="relative w-full max-w-md space-y-8 rounded-sm bg-ledger-card p-8 shadow-lg">
+      <div className="relative w-full max-w-md space-y-8 rounded-lg bg-ledger-card p-8 shadow-card">
         <Link
           href="/login"
-          className="absolute right-4 top-4 rounded-sm p-1 text-ledger-ink-muted hover:bg-ledger-paper hover:text-ledger-ink-muted"
+          className="absolute right-4 top-4 rounded-md p-1 text-ledger-ink-muted hover:bg-ledger-paper hover:text-ledger-ink-muted"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
 
         {sent ? (
           <div className="space-y-6">
-            <div className="rounded-sm bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
+            <div className="rounded-md bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
               If an account exists for {email}, a password reset link is on its way. Check your inbox
               (and spam folder).
             </div>
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+              <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
             )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-ledger-ink">
@@ -76,13 +76,13 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send reset link'}
             </button>

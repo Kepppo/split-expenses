@@ -8,51 +8,51 @@
    via `rgb(var(--token) / <alpha-value>)`.
    ========================================================================= */
 :root {
-  --background: 244 246 245;   /* #F4F6F5 */
+  --background: 248 250 249;   /* #F8FAF9 — very subtle green tint */
   --surface: 255 255 255;      /* #FFFFFF */
-  --surface-2: 247 248 246;    /* #F7F8F6 */
+  --surface-2: 243 244 246;    /* #F3F4F6 */
 
-  --ledger-paper: 244 246 245;
+  --ledger-paper: 248 250 249;
   --ledger-card: 255 255 255;
-  --ledger-rule: 226 230 228;  /* #E2E6E4 */
-  --ledger-ink: 27 42 50;      /* #1B2A32 */
-  --ledger-ink-muted: 95 106 102; /* #5F6A66 */
+  --ledger-rule: 229 231 235;  /* #E5E7EB — cool gray border */
+  --ledger-ink: 17 24 39;      /* #111827 — near-black */
+  --ledger-ink-muted: 107 114 128; /* #6B7280 — cool gray */
 
-  --ledger-teal: 47 111 98;        /* #2F6F62 */
-  --ledger-teal-light: 225 245 238;/* #E1F5EE */
-  --ledger-teal-dark: 31 78 68;    /* #1F4E44 */
+  --ledger-teal: 13 148 136;       /* #0D9488 — soft teal */
+  --ledger-teal-light: 204 251 241; /* #CCFBF1 */
+  --ledger-teal-dark: 15 118 110;   /* #0F766E */
 
-  --ledger-red: 178 58 46;        /* #B23A2E */
-  --ledger-red-light: 250 236 231;/* #FAECE7 */
+  --ledger-red: 220 38 38;        /* #DC2626 — clean red */
+  --ledger-red-light: 254 226 226; /* #FEE2E2 */
 
-  --ledger-brass: 184 146 90;     /* #B8925A */
+  --ledger-brass: 245 158 11;     /* #F59E0B — amber accent */
 
-  --ring: 47 111 98;
-  --shadow-color: 16 30 28;
+  --ring: 13 148 136;
+  --shadow-color: 0 0 0;
   color-scheme: light;
 }
 
 .dark {
-  --background: 15 20 19;     /* #0F1413 */
-  --surface: 22 28 27;        /* #161C1B */
-  --surface-2: 27 34 33;      /* #1B2221 */
+  --background: 15 23 21;     /* #0F1715 */
+  --surface: 22 30 28;        /* #161E1C */
+  --surface-2: 30 40 38;      /* #1E2826 */
 
-  --ledger-paper: 15 20 19;
-  --ledger-card: 22 28 27;
-  --ledger-rule: 38 48 46;    /* #26302E */
-  --ledger-ink: 232 237 235;  /* #E8EDEB */
-  --ledger-ink-muted: 154 168 163; /* #9AA8A3 */
+  --ledger-paper: 15 23 21;
+  --ledger-card: 22 30 28;
+  --ledger-rule: 55 65 63;    /* #37413F */
+  --ledger-ink: 243 244 246;  /* #F3F4F6 */
+  --ledger-ink-muted: 156 163 175; /* #9CA3AF */
 
-  --ledger-teal: 62 140 124;      /* #3E8C7C */
-  --ledger-teal-light: 22 48 43;  /* #16302B */
-  --ledger-teal-dark: 95 179 161; /* #5FB3A1 */
+  --ledger-teal: 45 212 191;      /* #2DD4BF — brighter in dark */
+  --ledger-teal-light: 19 48 44;  /* #13302C */
+  --ledger-teal-dark: 94 234 212; /* #5EEAD4 */
 
-  --ledger-red: 226 104 92;       /* #E2685C */
-  --ledger-red-light: 42 24 22;   /* #2A1816 */
+  --ledger-red: 248 113 113;       /* #F87171 */
+  --ledger-red-light: 60 20 18;   /* #3C1412 */
 
-  --ledger-brass: 210 169 104;    /* #D2A968 */
+  --ledger-brass: 251 191 36;    /* #FBBF24 */
 
-  --ring: 62 140 124;
+  --ring: 45 212 191;
   --shadow-color: 0 0 0;
   color-scheme: dark;
 }
@@ -65,34 +65,8 @@ body {
 /* Consistent, accessible focus ring everywhere */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgb(var(--ring) / 0.35);
-  border-radius: 8px;
-}
-
-/* Ruled ledger paper background — reserved for hero/empty moments */
-.ledger-ruled {
-  background-color: rgb(var(--ledger-card));
-  background-image: repeating-linear-gradient(rgb(var(--ledger-card)) 0 27px, rgb(var(--ledger-rule)) 27px 28px);
-  background-position: 0 56px;
-}
-
-/* Perforated tear-edge along the top of a ledger card */
-.ledger-perforation {
-  position: absolute;
-  top: -6px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
-  pointer-events: none;
-}
-
-.ledger-perforation span {
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: rgb(var(--ledger-paper));
+  box-shadow: 0 0 0 3px rgb(var(--ring) / 0.3);
+  border-radius: 10px;
 }
 
 /* Skeleton shimmer */
@@ -100,12 +74,12 @@ body {
   background: linear-gradient(
     90deg,
     rgb(var(--surface-2)) 25%,
-    rgb(var(--ledger-rule) / 0.6) 37%,
+    rgb(var(--ledger-rule) / 0.5) 37%,
     rgb(var(--surface-2)) 63%
   );
   background-size: 400% 100%;
   animation: skeleton-shimmer 1.4s ease infinite;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 @keyframes skeleton-shimmer {

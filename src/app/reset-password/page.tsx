@@ -70,19 +70,19 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-ledger-paper px-4">
-      <div className="w-full max-w-md space-y-8 rounded-sm bg-ledger-card p-8 shadow-lg">
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-ledger-card p-8 shadow-card">
         <h2 className="text-center text-3xl font-bold tracking-tight text-ledger-ink">
           Set a new password
         </h2>
 
         {invalidLink && (
           <div className="space-y-4">
-            <div className="rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
+            <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">
               This reset link is invalid or has expired. Request a new one.
             </div>
             <Link
               href="/forgot-password"
-              className="flex w-full justify-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark"
+              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark"
             >
               Request a new link
             </Link>
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
         {ready && !done && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+              <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
             )}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-ledger-ink">
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <div>
@@ -121,13 +121,13 @@ export default function ResetPasswordPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-sm border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Update password'}
             </button>
@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
         )}
 
         {done && (
-          <div className="rounded-sm bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
+          <div className="rounded-md bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
             Password updated. Taking you to your dashboard...
           </div>
         )}

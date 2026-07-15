@@ -192,7 +192,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/expenses"
-            className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+            className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Expense
@@ -200,15 +200,15 @@ export default function DashboardPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">
+          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">
             {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+          <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
             <div className="flex items-center">
-              <div className="rounded-sm bg-ledger-teal-light p-3">
+              <div className="rounded-md bg-ledger-teal-light p-3">
                 <Wallet className="h-6 w-6 text-ledger-teal" />
               </div>
               <div className="ml-4">
@@ -218,9 +218,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+          <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
             <div className="flex items-center">
-              <div className="rounded-sm bg-ledger-red-light p-3">
+              <div className="rounded-md bg-ledger-red-light p-3">
                 <Wallet className="h-6 w-6 text-ledger-red" />
               </div>
               <div className="ml-4">
@@ -230,9 +230,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+          <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
             <div className="flex items-center">
-              <div className="rounded-sm bg-ledger-teal-light p-3">
+              <div className="rounded-md bg-ledger-teal-light p-3">
                 <Users className="h-6 w-6 text-ledger-teal" />
               </div>
               <div className="ml-4">
@@ -242,9 +242,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+          <div className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
             <div className="flex items-center">
-              <div className="rounded-sm bg-ledger-paper p-3">
+              <div className="rounded-md bg-ledger-paper p-3">
                 <CalendarDays className="h-6 w-6 text-ledger-ink-muted" />
               </div>
               <div className="ml-4">
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={group.id}
-                    className="rounded-sm bg-ledger-card p-6 border border-ledger-rule hover:border-ledger-teal"
+                    className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm hover:border-ledger-teal"
                   >
                     <Link href={`/groups/${group.id}`}>
                       <div className="flex items-start justify-between">
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                     {myTopCreditor && (
                       <button
                         onClick={() => setSettleTarget(summary)}
-                        className="mt-4 inline-flex items-center rounded-sm border border-ledger-teal px-3 py-1.5 text-sm font-medium text-ledger-teal hover:bg-ledger-teal-light"
+                        className="mt-4 inline-flex items-center rounded-md border border-ledger-teal px-3 py-1.5 text-sm font-medium text-ledger-teal hover:bg-ledger-teal-light"
                       >
                         <HandCoins className="mr-1.5 h-4 w-4" />
                         Settle up
@@ -305,7 +305,7 @@ export default function DashboardPage() {
 
           <div>
             <h2 className="font-serif text-xl font-semibold text-ledger-ink">Recent Activity</h2>
-            <div className="mt-4 rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+            <div className="mt-4 rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
               <div className="space-y-4">
                 {recentEvents.map((event) => (
                   <Link

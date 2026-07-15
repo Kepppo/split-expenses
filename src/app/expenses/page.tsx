@@ -10,6 +10,7 @@ import { Money } from '@/components/LedgerCard';
 import { Avatar } from '@/components/Avatar';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Select } from '@/components/Select';
 
 function ExpensesPageInner() {
   const router = useRouter();
@@ -293,18 +294,18 @@ function ExpensesPageInner() {
             <p className="mt-2 text-ledger-ink-muted">Track and split expenses with your group</p>
           </div>
           <div className="flex items-center gap-3">
-            <select
+            <Select
               value={groupId}
               onChange={(e) => { setGroupId(e.target.value); setShowForm(false); }}
-              className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+              className="w-60"
             >
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
-            </select>
+            </Select>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+              className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Expense
@@ -313,11 +314,11 @@ function ExpensesPageInner() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
         )}
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mb-8 rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+          <form onSubmit={handleSubmit} className="mb-8 rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
             <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">
               {editingId ? 'Edit Expense' : 'New Expense'}
             </h2>
@@ -329,7 +330,7 @@ function ExpensesPageInner() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
@@ -340,7 +341,7 @@ function ExpensesPageInner() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
@@ -350,48 +351,48 @@ function ExpensesPageInner() {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-ledger-ink">Paid By</label>
-                <select
+                <Select
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 h-9"
                 >
                   <option value="">Select who paid</option>
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>{m.id === currentUserId ? 'You' : m.name}</option>
                   ))}
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-ledger-ink">Category</label>
-                <select
+                <Select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 h-9"
                 >
                   <option value="">Uncategorized</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-ledger-ink">Split Type</label>
-                <select
+                <Select
                   value={splitType}
                   onChange={(e) => setSplitType(e.target.value as SplitType)}
-                  className="mt-1 block w-full rounded-sm border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1 h-9"
                 >
                   <option value="equal">Equal</option>
                   <option value="percentage">Percentage</option>
                   <option value="fixed">Fixed Amount</option>
                   <option value="custom">Custom</option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -414,7 +415,7 @@ function ExpensesPageInner() {
                       onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
                       placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : '$'}
                       disabled={splitType === 'equal' || !includedMembers[m.id]}
-                      className="block w-full rounded-sm border border-ledger-rule px-3 py-1 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal disabled:bg-ledger-paper"
+                      className="block w-full rounded-md border border-ledger-rule px-3 py-1 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal disabled:bg-ledger-paper"
                     />
                   </div>
                 ))}
@@ -445,14 +446,14 @@ function ExpensesPageInner() {
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
-                className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
               >
                 {editingId ? 'Update' : 'Create'} Expense
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center rounded-sm border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
+                className="inline-flex items-center rounded-md border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
               >
                 Cancel
               </button>
@@ -464,7 +465,7 @@ function ExpensesPageInner() {
           {expenses.map((expense) => {
             const expenseSplits = splits.filter((s) => s.expense_id === expense.id);
             return (
-              <div key={expense.id} className="rounded-sm bg-ledger-card p-6 border border-ledger-rule">
+              <div key={expense.id} className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
@@ -493,13 +494,13 @@ function ExpensesPageInner() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(expense)}
-                      className="rounded-sm p-2 text-ledger-ink-muted hover:bg-ledger-paper"
+                      className="rounded-md p-2 text-ledger-ink-muted hover:bg-ledger-paper"
                     >
                       <Edit className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => deleteExpense(expense.id)}
-                      className="rounded-sm p-2 text-ledger-red hover:bg-ledger-red-light"
+                      className="rounded-md p-2 text-ledger-red hover:bg-ledger-red-light"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>

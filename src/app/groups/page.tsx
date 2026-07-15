@@ -8,6 +8,7 @@ import { Plus, Users, Check, X as XIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CURRENCIES } from '@/lib/utils';
+import { Select } from '@/components/Select';
 
 export default function GroupsPage() {
   const router = useRouter();
@@ -163,29 +164,29 @@ export default function GroupsPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-sm bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
         )}
 
         {invites.length > 0 && (
-          <div className="mb-8 rounded-sm bg-ledger-teal-light p-6">
+          <div className="mb-8 rounded-md bg-ledger-teal-light p-6">
             <h2 className="mb-3 text-lg font-medium text-ledger-teal-dark">Pending invites</h2>
             <div className="space-y-3">
               {invites.map((invite) => (
-                <div key={invite.id} className="flex items-center justify-between rounded-sm bg-ledger-card p-4 border border-ledger-rule">
+                <div key={invite.id} className="flex items-center justify-between rounded-lg bg-ledger-card p-4 border border-ledger-rule shadow-card-sm">
                   <span className="text-sm text-ledger-ink">
                     You&apos;ve been invited to <strong>{groupNamesByInvite[invite.group_id] || 'a group'}</strong>
                   </span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => acceptInvite(invite.id)}
-                      className="inline-flex items-center rounded-sm bg-ledger-teal px-3 py-1.5 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                      className="inline-flex items-center rounded-md bg-ledger-teal px-3 py-1.5 text-sm font-medium text-white hover:bg-ledger-teal-dark"
                     >
                       <Check className="mr-1 h-4 w-4" />
                       Accept
                     </button>
                     <button
                       onClick={() => declineInvite(invite.id)}
-                      className="inline-flex items-center rounded-sm border border-ledger-rule px-3 py-1.5 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
+                      className="inline-flex items-center rounded-md border border-ledger-rule px-3 py-1.5 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
                     >
                       <XIcon className="mr-1 h-4 w-4" />
                       Decline
@@ -203,23 +204,23 @@ export default function GroupsPage() {
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
             placeholder="New group name (e.g., Apartment, Iceland Trip)"
-            className="flex-1 rounded-sm border border-ledger-rule px-4 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+            className="flex-1 rounded-md border border-ledger-rule px-4 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
           />
-          <select
+          <Select
             value={newGroupCurrency}
             onChange={(e) => setNewGroupCurrency(e.target.value)}
             aria-label="Currency"
-            className="rounded-sm border border-ledger-rule px-3 py-2 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+            className="sm:w-56"
           >
             {CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.code} — {c.label}
               </option>
             ))}
-          </select>
+          </Select>
           <button
             type="submit"
-            className="inline-flex items-center rounded-sm bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+            className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
           >
             <Plus className="mr-2 h-4 w-4" />
             Create Group
@@ -231,7 +232,7 @@ export default function GroupsPage() {
             <Link
               key={group.id}
               href={`/groups/${group.id}`}
-              className="flex items-center justify-between rounded-sm bg-ledger-card p-6 border border-ledger-rule hover:border-ledger-teal"
+              className="flex items-center justify-between rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm hover:border-ledger-teal"
             >
               <div>
                 <h3 className="font-serif text-lg font-semibold text-ledger-ink">{group.name}</h3>
