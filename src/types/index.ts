@@ -36,7 +36,7 @@ export interface Category {
   group_id: string;
   name: string;
   color: string;
-  default_split_type: 'equal' | 'percentage' | 'fixed' | 'custom';
+  default_split_type: 'equal' | 'percentage' | 'fixed';
   created_at: string;
 }
 
@@ -86,7 +86,7 @@ export interface ActivityLog {
   created_at: string;
 }
 
-export type SplitType = 'equal' | 'percentage' | 'fixed' | 'custom';
+export type SplitType = 'equal' | 'percentage' | 'fixed';
 
 /** A single directional debt: `from` owes `to` this `amount`. */
 export interface Debt {

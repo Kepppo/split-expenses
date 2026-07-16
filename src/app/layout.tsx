@@ -1,25 +1,19 @@
 import type { Metadata } from 'next';
-import { Fraunces, IBM_Plex_Mono, Inter } from 'next/font/google';
+import { DM_Sans, Sora } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/components/Toast';
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-fraunces',
-});
-
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
+  variable: '--font-dm-sans',
 });
 
-const plexMono = IBM_Plex_Mono({
+const sora = Sora({
   subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-plex-mono',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sora',
 });
 
 export const metadata: Metadata = {
@@ -40,7 +34,7 @@ const themeScript = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${sora.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

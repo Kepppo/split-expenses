@@ -30,32 +30,32 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ledger-paper px-4">
-      <div className="relative w-full max-w-md space-y-8 rounded-lg bg-ledger-card p-8 shadow-card">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="relative w-full max-w-md space-y-8 rounded-2xl border border-rule bg-surface p-8 shadow-card">
         <Link
           href="/login"
-          className="absolute right-4 top-4 rounded-md p-1 text-ledger-ink-muted hover:bg-ledger-paper hover:text-ledger-ink-muted"
+          className="absolute right-4 top-4 rounded-lg p-1 text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
         </Link>
         <div>
-          <h2 className="text-center text-3xl font-bold tracking-tight text-ledger-ink">
+          <h2 className="text-center text-3xl font-bold tracking-tight text-ink">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-ledger-ink-muted">
+          <p className="mt-2 text-center text-sm text-ink-muted">
             Enter your email and we&apos;ll send you a link to set a new one.
           </p>
         </div>
 
         {sent ? (
           <div className="space-y-6">
-            <div className="rounded-md bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
+            <div className="rounded-xl bg-primary-light p-4 text-sm text-primary">
               If an account exists for {email}, a password reset link is on its way. Check your inbox
               (and spam folder).
             </div>
-            <p className="text-center text-sm text-ledger-ink-muted">
-              <Link href="/login" className="font-medium text-ledger-teal hover:text-ledger-teal-dark">
+            <p className="text-center text-sm text-ink-muted">
+              <Link href="/login" className="font-medium text-primary hover:text-primary-dark">
                 Back to sign in
               </Link>
             </p>
@@ -63,10 +63,10 @@ export default function ForgotPasswordPage() {
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+              <div className="rounded-lg bg-danger-light p-4 text-sm text-danger">{error}</div>
             )}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-ledger-ink">
+              <label htmlFor="email" className="block text-sm font-medium text-ink">
                 Email address
               </label>
               <input
@@ -76,19 +76,19 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1.5 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send reset link'}
             </button>
-            <p className="text-center text-sm text-ledger-ink-muted">
+            <p className="text-center text-sm text-ink-muted">
               Remembered it?{' '}
-              <Link href="/login" className="font-medium text-ledger-teal hover:text-ledger-teal-dark">
+              <Link href="/login" className="font-medium text-primary hover:text-primary-dark">
                 Back to sign in
               </Link>
             </p>

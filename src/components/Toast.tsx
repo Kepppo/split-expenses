@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useState } from 'react';
 import { Check, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type ToastVariant = 'success' | 'error' | 'info';
 
@@ -31,23 +32,26 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex animate-toast-in items-center gap-3 rounded-md border border-ledger-rule bg-ledger-card px-4 py-3 shadow-card"
-            style={t.variant === 'error' ? { borderLeft: '4px solid rgb(var(--ledger-red))' } : undefined}
+            className={cn(
+              'pointer-events-auto flex animate-toast-in items-center gap-3 rounded-xl border border-rule bg-surface px-4 py-3 shadow-card',
+              t.variant === 'error' && 'border-l-4 border-l-danger'
+            )}
             role="status"
           >
             <span
-              className={
+              className={cn(
+                'grid h-5 w-5 place-items-center rounded-full',
                 t.variant === 'error'
-                  ? 'grid h-5 w-5 place-items-center rounded-full bg-ledger-red-light text-ledger-red'
-                  : 'grid h-5 w-5 place-items-center rounded-full bg-ledger-teal-light text-ledger-teal'
-              }
+                  ? 'bg-danger-light text-danger'
+                  : 'bg-primary-light text-primary'
+              )}
             >
               {t.variant === 'error' ? <X className="h-3 w-3" /> : <Check className="h-3 w-3" />}
             </span>
-            <span className="flex-1 text-sm font-medium text-ledger-ink">{t.message}</span>
+            <span className="flex-1 text-sm font-medium text-ink">{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
-              className="text-ledger-ink-muted hover:text-ledger-ink"
+              className="text-ink-muted hover:text-ink"
               aria-label="Dismiss"
             >
               <X className="h-4 w-4" />

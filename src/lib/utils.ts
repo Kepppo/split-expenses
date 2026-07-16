@@ -24,8 +24,8 @@ export function currencySymbol(code: string): string {
   return CURRENCIES.find((c) => c.code === code)?.symbol ?? '$';
 }
 
-/** Locale-aware currency formatting. `code` defaults to USD. */
-export function formatMoney(amount: number, code = 'USD'): string {
+/** Locale-aware currency formatting. `code` defaults to EUR. */
+export function formatMoney(amount: number, code = 'EUR'): string {
   try {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',

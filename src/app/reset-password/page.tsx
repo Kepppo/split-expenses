@@ -16,21 +16,16 @@ export default function ResetPasswordPage() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // The Supabase client automatically parses the recovery token out of the
-    // URL and fires this event once a temporary recovery session is ready.
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setReady(true);
       }
     });
 
-    // If the tab was already open / event already fired before we
-    // subscribed, fall back to checking for an existing session.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setReady(true);
       } else {
-        // Give the URL-parsing a moment before deciding the link is bad.
         setTimeout(() => {
           supabase.auth.getSession().then(({ data: { session: s2 } }) => {
             if (s2) setReady(true);
@@ -69,20 +64,20 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ledger-paper px-4">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-ledger-card p-8 shadow-card">
-        <h2 className="text-center text-3xl font-bold tracking-tight text-ledger-ink">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-rule bg-surface p-8 shadow-card">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-ink">
           Set a new password
         </h2>
 
         {invalidLink && (
           <div className="space-y-4">
-            <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">
+            <div className="rounded-lg bg-danger-light p-4 text-sm text-danger">
               This reset link is invalid or has expired. Request a new one.
             </div>
             <Link
               href="/forgot-password"
-              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark"
+              className="flex w-full justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
             >
               Request a new link
             </Link>
@@ -90,16 +85,16 @@ export default function ResetPasswordPage() {
         )}
 
         {!invalidLink && !ready && (
-          <p className="text-center text-sm text-ledger-ink-muted">Verifying your reset link...</p>
+          <p className="text-center text-sm text-ink-muted">Verifying your reset link...</p>
         )}
 
         {ready && !done && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+              <div className="rounded-lg bg-danger-light p-4 text-sm text-danger">{error}</div>
             )}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-ledger-ink">
+              <label htmlFor="password" className="block text-sm font-medium text-ink">
                 New password
               </label>
               <input
@@ -108,11 +103,11 @@ export default function ResetPasswordPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1.5 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ledger-ink">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink">
                 Confirm new password
               </label>
               <input
@@ -121,13 +116,13 @@ export default function ResetPasswordPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 shadow-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                className="mt-1.5 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md border border-transparent bg-ledger-teal px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ledger-teal-dark focus:outline-none focus:ring-2 focus:ring-ledger-teal focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Update password'}
             </button>
@@ -135,7 +130,7 @@ export default function ResetPasswordPage() {
         )}
 
         {done && (
-          <div className="rounded-md bg-ledger-teal-light p-4 text-sm text-ledger-teal-dark">
+          <div className="rounded-xl bg-primary-light p-4 text-sm text-primary">
             Password updated. Taking you to your dashboard...
           </div>
         )}

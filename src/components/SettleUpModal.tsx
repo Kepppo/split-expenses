@@ -6,6 +6,7 @@ import { AppUser } from '@/types';
 import { X } from 'lucide-react';
 import { currencySymbol } from '@/lib/utils';
 import { Select } from '@/components/Select';
+import { cn } from '@/lib/utils';
 
 interface SettleUpModalProps {
   groupId: string;
@@ -24,7 +25,7 @@ export function SettleUpModal({
   members,
   defaultPayTo,
   defaultAmount,
-  currency = 'USD',
+  currency = 'EUR',
   onClose,
   onSettled,
 }: SettleUpModalProps) {
@@ -72,34 +73,35 @@ export function SettleUpModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="relative w-full max-w-md rounded-lg bg-ledger-card p-6 shadow-card">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+      <div className={cn(
+        'relative w-full max-w-md rounded-2xl bg-surface p-6 shadow-card-hover',
+        stamped && 'pointer-events-none'
+      )}>
         {stamped && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-ledger-card/70">
-            <div className="animate-stamp rounded border-4 border-ledger-brass px-6 py-2 font-mono text-2xl font-medium uppercase tracking-widest text-ledger-brass">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-surface/80 backdrop-blur-sm">
+            <div className="animate-stamp rounded-lg border-4 border-accent bg-accent-light px-6 py-2 font-mono text-2xl font-bold uppercase tracking-widest text-accent">
               Paid
             </div>
           </div>
         )}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-serif text-lg font-semibold text-ledger-ink">Settle Up</h2>
-          <button onClick={onClose} className="rounded-md p-1 text-ledger-ink-muted hover:bg-ledger-paper">
+          <h2 className="font-heading text-lg font-semibold text-ink">Settle Up</h2>
+          <button onClick={onClose} className="rounded-lg p-1 text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-md bg-ledger-red-light p-3 text-sm text-ledger-red">{error}</div>
-        )}
+        {error && <div className="mb-4 rounded-lg bg-danger-light p-3 text-sm text-danger">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-ledger-ink">I paid</label>
+            <label className="block text-sm font-medium text-ink">I paid</label>
             <Select
               value={paidTo}
               onChange={(e) => setPaidTo(e.target.value)}
               required
-              className="mt-1 h-9"
+              className="mt-1 h-10"
             >
               {others.map((m) => (
                 <option key={m.id} value={m.id}>{m.name}</option>
@@ -108,8 +110,8 @@ export function SettleUpModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ledger-ink">
-              Amount <span className="text-ledger-ink-muted">({currencySymbol(currency)})</span>
+            <label className="block text-sm font-medium text-ink">
+              Amount <span className="text-ink-muted">({currencySymbol(currency)})</span>
             </label>
             <input
               type="number"
@@ -118,29 +120,29 @@ export function SettleUpModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+              className="mt-1 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ledger-ink">Date</label>
+            <label className="block text-sm font-medium text-ink">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+              className="mt-1 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ledger-ink">Note (optional)</label>
+            <label className="block text-sm font-medium text-ink">Note (optional)</label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g., Cash, Bizum, bank transfer"
-              className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+              className="mt-1 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
@@ -148,14 +150,14 @@ export function SettleUpModal({
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg disabled:opacity-50"
             >
               {submitting ? 'Recording...' : 'Record Payment'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center rounded-md border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
+              className="inline-flex items-center rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
             >
               Cancel
             </button>

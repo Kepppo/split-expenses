@@ -107,13 +107,13 @@ export default function ActivityPage() {
   const groupName = (id?: string) => groups.find((g) => g.id === id)?.name;
 
   return (
-    <div className="min-h-screen bg-ledger-paper">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Activity</h1>
-            <p className="mt-2 text-ledger-ink-muted">A readable trail of everything that happened</p>
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-ink">Activity</h1>
+            <p className="mt-2 text-ink-muted">A readable trail of everything that happened</p>
           </div>
           {groups.length > 0 && (
             <Select
@@ -131,12 +131,12 @@ export default function ActivityPage() {
           )}
         </div>
 
-        {error && <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>}
+        {error && <div className="mb-4 rounded-lg bg-danger-light p-4 text-sm text-danger">{error}</div>}
 
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-lg border border-ledger-rule bg-ledger-card p-4 shadow-card-sm">
+              <div key={i} className="flex items-center gap-4 rounded-2xl border border-rule bg-surface p-4 shadow-card">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-2/3" />
@@ -161,22 +161,23 @@ export default function ActivityPage() {
               return (
                 <li
                   key={log.id}
-                  className="flex items-center gap-4 rounded-lg border border-ledger-rule bg-ledger-card p-4 shadow-card-sm"
+                  className="group relative overflow-hidden flex items-center gap-4 rounded-2xl border border-rule bg-surface p-4 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ledger-teal-light text-ledger-teal">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-light text-primary">
                     {log.action === 'delete' ? <Trash2 className="h-5 w-5" /> : log.action === 'update' ? <Pencil className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-ledger-ink">
+                    <p className="truncate text-sm text-ink">
                       <span className="font-medium">{actorName}</span> {d.verb} a {d.noun}
                     </p>
-                    <p className="text-xs text-ledger-ink-muted">
+                    <p className="text-xs text-ink-muted">
                       {groupName(log.group_id ?? undefined) ?? 'General'} · {timeAgo(log.created_at)}
                     </p>
                   </div>
                   {typeof d.amount === 'number' && (
-                    <Money amount={d.amount} currency={d.currency ?? 'USD'} neutral className="shrink-0 text-sm" />
+                    <Money amount={d.amount} currency={d.currency ?? 'EUR'} neutral className="shrink-0 text-sm" />
                   )}
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
                 </li>
               );
             })}

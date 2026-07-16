@@ -1,16 +1,15 @@
 import { AppUser } from '@/types';
+import { cn } from '@/lib/utils';
 
-// Muted, ink-like tones distinct from the teal/red used for credit/debit,
-// so avatar color never gets confused with balance meaning.
 const PALETTE = [
-  '#3F5D6B', // slate teal
-  '#8A5A3C', // brass-adjacent brown
-  '#5B4B8A', // plum
-  '#3F6B4F', // forest
-  '#7A4B57', // wine
-  '#4B5D3F', // olive
-  '#4C5B8A', // denim
-  '#8A6B3F', // ochre
+  '#3F5D6B',
+  '#8A5A3C',
+  '#5B4B8A',
+  '#3F6B4F',
+  '#7A4B57',
+  '#4B5D3F',
+  '#4C5B8A',
+  '#8A6B3F',
 ];
 
 function hashString(str: string): number {
@@ -46,11 +45,14 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
 
   if (user.avatar_url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={user.avatar_url}
         alt={user.name}
-        className={`inline-block rounded-full object-cover ring-1 ring-ledger-rule ${sizeClasses} ${className}`}
+        className={cn(
+          'inline-block rounded-full object-cover ring-1 ring-rule',
+          sizeClasses,
+          className
+        )}
       />
     );
   }
@@ -59,7 +61,11 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-mono font-medium text-white ${sizeClasses} ${className}`}
+      className={cn(
+        'inline-flex items-center justify-center rounded-full font-mono font-medium text-white',
+        sizeClasses,
+        className
+      )}
       style={{ backgroundColor: color }}
       title={user.name}
     >
@@ -84,11 +90,14 @@ export function AvatarStack({
   return (
     <span className="inline-flex items-center -space-x-2">
       {shown.map((u) => (
-        <Avatar key={u.id} user={u} size={size} className="ring-2 ring-ledger-card" />
+        <Avatar key={u.id} user={u} size={size} className="ring-2 ring-surface" />
       ))}
       {overflow > 0 && (
         <span
-          className={`inline-flex items-center justify-center rounded-full bg-ledger-rule font-mono font-medium text-ledger-ink-muted ring-2 ring-ledger-card ${SIZES[size]}`}
+          className={cn(
+            'inline-flex items-center justify-center rounded-full bg-surface-2 font-mono font-medium text-ink-muted ring-2 ring-surface',
+            SIZES[size]
+          )}
         >
           +{overflow}
         </span>

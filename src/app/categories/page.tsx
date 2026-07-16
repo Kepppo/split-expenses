@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Category, Group } from '@/types';
 import { Navbar } from '@/components/Navbar';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X as XIcon } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/Select';
 
@@ -17,7 +17,6 @@ const SPLIT_TYPES = [
   { value: 'equal', label: 'Equal Split' },
   { value: 'percentage', label: 'Percentage' },
   { value: 'fixed', label: 'Fixed Amount' },
-  { value: 'custom', label: 'Custom' },
 ] as const;
 
 function CategoriesPageInner() {
@@ -32,6 +31,10 @@ function CategoriesPageInner() {
   const [splitType, setSplitType] = useState<Category['default_split_type']>('equal');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editColor, setEditColor] = useState(COLORS[0]);
+  const [editSplitType, setEditSplitType] = useState<Category['default_split_type']>('equal');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -108,6 +111,35 @@ function CategoriesPageInner() {
     fetchCategories();
   };
 
+  const startEdit = (cat: Category) => {
+    setEditingId(cat.id);
+    setEditName(cat.name);
+    setEditColor(cat.color);
+    setEditSplitType(cat.default_split_type);
+  };
+
+  const saveEdit = async (id: string) => {
+    if (!editName.trim()) return;
+    const { error } = await supabase.from('categories').update({
+      name: editName.trim(),
+      color: editColor,
+      default_split_type: editSplitType,
+    }).eq('id', id);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setEditingId(null);
+    fetchCategories();
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditColor(COLORS[0]);
+    setEditSplitType('equal');
+  };
+
   const deleteCategory = async (id: string) => {
     const { error: deleteError } = await supabase.from('categories').delete().eq('id', id);
     if (deleteError) {
@@ -119,10 +151,10 @@ function CategoriesPageInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ledger-paper">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-ledger-ink-muted">Loading...</p>
+          <p className="text-center text-ink-muted">Loading...</p>
         </main>
       </div>
     );
@@ -130,12 +162,12 @@ function CategoriesPageInner() {
 
   if (groups.length === 0) {
     return (
-      <div className="min-h-screen bg-ledger-paper">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-ledger-ink-muted">
+          <p className="text-center text-ink-muted">
             You&apos;re not in any groups yet. Create one on the{' '}
-            <a href="/groups" className="text-ledger-teal hover:underline">Groups</a> page first.
+            <a href="/groups" className="text-primary hover:text-primary-dark">Groups</a> page first.
           </p>
         </main>
       </div>
@@ -143,13 +175,13 @@ function CategoriesPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-ledger-paper">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Categories</h1>
-            <p className="mt-2 text-ledger-ink-muted">Organize expenses by category with default split rules</p>
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-ink">Categories</h1>
+            <p className="mt-2 text-ink-muted">Organize expenses by category with default split rules</p>
           </div>
           <Select
             value={groupId}
@@ -163,42 +195,45 @@ function CategoriesPageInner() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">
+          <div className="mb-4 rounded-lg bg-danger-light p-4 text-sm text-danger">
             {error}
           </div>
         )}
 
-        <form onSubmit={addCategory} className="mb-8 rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card">
+        <form onSubmit={addCategory} className="mb-8 rounded-2xl border border-rule bg-surface p-6 shadow-card">
+          <h3 className="mb-4 font-heading text-base font-semibold text-ink">Add a new category</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Name</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-muted">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Groceries"
-                className="h-10 w-full rounded-md border border-ledger-rule bg-ledger-surface-2 px-3.5 text-sm transition-all duration-200 hover:border-ledger-ink-muted focus-visible:border-ledger-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-teal/40 focus-visible:ring-offset-2"
+                placeholder="e.g., Groceries, Rent, Transport"
+                className="h-10 w-full rounded-xl border border-rule bg-surface px-3.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Color</label>
-              <div className="flex h-10 flex-wrap items-center gap-2.5">
+              <label className="mb-1.5 block text-sm font-medium text-ink-muted">Color</label>
+              <div className="flex flex-wrap items-center gap-2.5">
                 {COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110 ${
-                      color === c ? 'border-ledger-ink ring-2 ring-ledger-ink/20' : 'border-transparent'
-                    }`}
-                    style={{ backgroundColor: c }}
+                    className="h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110"
+                    style={{
+                      backgroundColor: c,
+                      borderColor: color === c ? 'currentColor' : 'transparent',
+                      boxShadow: color === c ? '0 0 0 2px rgba(0,0,0,0.2)' : 'none',
+                    }}
                     aria-label={c}
                   />
                 ))}
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ledger-ink">Default Split</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-muted">Default Split</label>
               <Select
                 value={splitType}
                 onChange={(e) => setSplitType(e.target.value as Category['default_split_type'])}
@@ -212,9 +247,9 @@ function CategoriesPageInner() {
             <div>
               <button
                 type="submit"
-                className="inline-flex h-10 w-full items-center justify-center rounded-md bg-ledger-teal px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-ledger-teal-dark hover:shadow-sm sm:w-auto"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark sm:w-auto"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 Add Category
               </button>
             </div>
@@ -223,32 +258,102 @@ function CategoriesPageInner() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between rounded-lg border border-ledger-rule bg-ledger-card p-6 shadow-card-sm">
-              <div className="flex items-center">
-                <div
-                  className="h-4 w-4 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                />
-                <div className="ml-4">
-                  <h3 className="font-serif text-lg font-semibold text-ledger-ink">{category.name}</h3>
-                  <p className="text-sm text-ledger-ink-muted">
-                    Default: {SPLIT_TYPES.find(st => st.value === category.default_split_type)?.label}
-                  </p>
+            <div key={category.id} className="group relative overflow-hidden rounded-2xl border border-rule bg-surface p-5 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
+              {editingId === category.id ? (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full rounded-xl border border-rule bg-surface-2 px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    autoFocus
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setEditColor(c)}
+                        className="h-7 w-7 rounded-full border-2 transition-all hover:scale-110"
+                        style={{
+                          backgroundColor: c,
+                          borderColor: editColor === c ? 'currentColor' : 'transparent',
+                          boxShadow: editColor === c ? '0 0 0 2px rgba(0,0,0,0.2)' : 'none',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <Select
+                    value={editSplitType}
+                    onChange={(e) => setEditSplitType(e.target.value as Category['default_split_type'])}
+                    className="w-full"
+                  >
+                    {SPLIT_TYPES.map((st) => (
+                      <option key={st.value} value={st.value}>{st.label}</option>
+                    ))}
+                  </Select>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => saveEdit(category.id)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Save
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-rule bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted"
+                    >
+                      <XIcon className="h-3.5 w-3.5" /> Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <button
-                onClick={() => deleteCategory(category.id)}
-                className="rounded-md p-2 text-ledger-red transition-colors hover:bg-ledger-red-light"
-                aria-label="Delete category"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
+              ) : (
+                <>
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="h-10 w-10 rounded-xl"
+                        style={{ backgroundColor: category.color + '20' }}
+                      >
+                        <div className="flex h-full w-full items-center justify-center">
+                          <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-heading text-base font-semibold text-ink">{category.name}</h3>
+                        <p className="text-sm text-ink-muted">
+                          {SPLIT_TYPES.find(st => st.value === category.default_split_type)?.label}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <button
+                        onClick={() => startEdit(category)}
+                        className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteCategory(category.id)}
+                        className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-danger-light hover:text-danger"
+                        aria-label="Delete category"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
+                </>
+              )}
             </div>
           ))}
           {categories.length === 0 && (
-            <p className="col-span-full text-center text-ledger-ink-muted">
-              No categories yet. Create your first category above.
-            </p>
+            <div className="col-span-full rounded-2xl border border-dashed border-rule bg-surface-2 px-6 py-12 text-center">
+              <p className="text-ink-muted">No categories yet. Create your first category above.</p>
+            </div>
           )}
         </div>
       </main>

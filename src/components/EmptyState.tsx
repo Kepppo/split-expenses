@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -10,21 +11,24 @@ interface EmptyStateProps {
 }
 
 const ACTION_CLASS =
-  'mt-5 inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark';
+  'mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg';
 
 /** Friendly empty state with icon, copy, and a single primary action. */
 export function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center rounded-lg border border-dashed border-ledger-rule bg-surface-2 px-6 py-12 text-center ${className}`}
+      className={cn(
+        'flex flex-col items-center rounded-2xl border border-dashed border-rule bg-surface-2 px-6 py-16 text-center',
+        className
+      )}
     >
       {icon && (
-        <div className="mb-4 grid h-14 w-14 place-items-center rounded-lg bg-ledger-teal-light text-ledger-teal">
+        <div className="mb-4 grid h-14 w-14 place-items-center rounded-xl bg-primary-light text-primary">
           {icon}
         </div>
       )}
-      <h3 className="font-serif text-lg font-semibold text-ledger-ink">{title}</h3>
-      {description && <p className="mt-1 max-w-sm text-sm text-ledger-ink-muted">{description}</p>}
+      <h3 className="font-heading text-lg font-semibold text-ink">{title}</h3>
+      {description && <p className="mt-1 max-w-sm text-sm text-ink-muted">{description}</p>}
       {action?.href ? (
         <Link href={action.href} className={ACTION_CLASS}>
           {action.label}

@@ -4,13 +4,14 @@ import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AppUser, Group, Category, Expense, ExpenseSplit, SplitType } from '@/types';
 import { splitEqually } from '@/lib/balances';
-import { formatMoney } from '@/lib/utils';
+import { formatMoney, currencySymbol } from '@/lib/utils';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar } from '@/components/Avatar';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit, ChevronDown, Users, DollarSign } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/Select';
+import { cn } from '@/lib/utils';
 
 function ExpensesPageInner() {
   const router = useRouter();
@@ -40,10 +41,11 @@ function ExpensesPageInner() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        router.push('/login');
-      } else {
+      if (user) {
         setCurrentUserId(user.id);
+        setPaidBy(user.id);
+      } else {
+        router.push('/login');
       }
     });
   }, [router]);
@@ -159,7 +161,7 @@ function ExpensesPageInner() {
 
     const totalSplit = splitRows.reduce((sum, s) => sum + s.amount, 0);
     if (Math.abs(totalSplit - amountNum) > 0.01) {
-      setError(`Split amounts total $${totalSplit.toFixed(2)}, but the expense is $${amountNum.toFixed(2)}`);
+      setError(`Split amounts total ${formatMoney(totalSplit, groups.find(g => g.id === groupId)?.currency || 'EUR')}, but the expense is ${formatMoney(amountNum, groups.find(g => g.id === groupId)?.currency || 'EUR')}`);
       return;
     }
 
@@ -223,7 +225,7 @@ function ExpensesPageInner() {
     });
     setSplitValues(values);
     setIncludedMembers(included);
-    setSplitType('custom');
+    setSplitType('fixed');
     setShowForm(true);
   };
 
@@ -238,7 +240,7 @@ function ExpensesPageInner() {
     members.find((m) => m.id === id) || { id, email: '', name: 'Unknown', avatar_url: null, created_at: '' };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || 'Uncategorized';
   const getCategoryColor = (id: string | null) => categories.find((c) => c.id === id)?.color || '#ccc';
-  const groupCurrency = groups.find((g) => g.id === groupId)?.currency || 'USD';
+  const groupCurrency = groups.find((g) => g.id === groupId)?.currency || 'EUR';
 
   const includedIds = members.filter((m) => includedMembers[m.id]).map((m) => m.id);
   const amountNum = parseFloat(amount) || 0;
@@ -261,10 +263,10 @@ function ExpensesPageInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ledger-paper">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-ledger-ink-muted">Loading...</p>
+          <p className="text-center text-ink-muted">Loading...</p>
         </main>
       </div>
     );
@@ -272,12 +274,12 @@ function ExpensesPageInner() {
 
   if (groups.length === 0) {
     return (
-      <div className="min-h-screen bg-ledger-paper">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-center text-ledger-ink-muted">
+          <p className="text-center text-ink-muted">
             You&apos;re not in any groups yet. Create one on the{' '}
-            <a href="/groups" className="text-ledger-teal hover:underline">Groups</a> page first.
+            <a href="/groups" className="text-primary hover:text-primary-dark">Groups</a> page first.
           </p>
         </main>
       </div>
@@ -285,13 +287,13 @@ function ExpensesPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-ledger-paper">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-ledger-ink">Expenses</h1>
-            <p className="mt-2 text-ledger-ink-muted">Track and split expenses with your group</p>
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-ink">Expenses</h1>
+            <p className="mt-2 text-ink-muted">Track and split expenses with your group</p>
           </div>
           <div className="flex items-center gap-3">
             <Select
@@ -305,62 +307,69 @@ function ExpensesPageInner() {
             </Select>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               Add Expense
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-md bg-ledger-red-light p-4 text-sm text-ledger-red">{error}</div>
+          <div className="mb-4 rounded-lg bg-danger-light p-4 text-sm text-danger">{error}</div>
         )}
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mb-8 rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
-            <h2 className="mb-4 font-serif text-lg font-semibold text-ledger-ink">
+          <form onSubmit={handleSubmit} className="mb-8 rounded-2xl border border-rule bg-surface p-6 shadow-card">
+            <h2 className="mb-4 font-heading text-lg font-semibold text-ink">
               {editingId ? 'Edit Expense' : 'New Expense'}
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Description</label>
+                <label className="block text-sm font-medium text-ink">Description</label>
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  placeholder="e.g., Grocery run, Uber ride"
+                  className="mt-1.5 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Amount</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
-                />
+                <label className="block text-sm font-medium text-ink">
+                  Amount <span className="text-ink-muted">({currencySymbol(groupCurrency)})</span>
+                </label>
+                <div className="relative mt-1.5">
+                  <DollarSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    required
+                    placeholder="0.00"
+                    className="block w-full rounded-xl border border-rule bg-surface pl-9 pr-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Date</label>
+                <label className="block text-sm font-medium text-ink">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border border-ledger-rule px-3 py-2 focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal"
+                  className="mt-1.5 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Paid By</label>
+                <label className="block text-sm font-medium text-ink">Paid By</label>
                 <Select
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
                   required
-                  className="mt-1 h-9"
+                  className="mt-1.5"
                 >
                   <option value="">Select who paid</option>
                   {members.map((m) => (
@@ -369,11 +378,11 @@ function ExpensesPageInner() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Category</label>
+                <label className="block text-sm font-medium text-ink">Category</label>
                 <Select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="mt-1 h-9"
+                  className="mt-1.5"
                 >
                   <option value="">Uncategorized</option>
                   {categories.map((c) => (
@@ -382,40 +391,39 @@ function ExpensesPageInner() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-ledger-ink">Split Type</label>
+                <label className="block text-sm font-medium text-ink">Split Type</label>
                 <Select
                   value={splitType}
                   onChange={(e) => setSplitType(e.target.value as SplitType)}
-                  className="mt-1 h-9"
+                  className="mt-1.5"
                 >
                   <option value="equal">Equal</option>
                   <option value="percentage">Percentage</option>
                   <option value="fixed">Fixed Amount</option>
-                  <option value="custom">Custom</option>
                 </Select>
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-ledger-ink">Split Among</label>
-              <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-ink mb-2">Split Among</label>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {members.map((m) => (
-                  <div key={m.id} className="flex items-center gap-2">
+                  <div key={m.id} className="flex items-center gap-3 rounded-xl border border-rule bg-surface-2/50 p-3">
                     <input
                       type="checkbox"
                       checked={!!includedMembers[m.id]}
                       onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
-                      className="rounded border-ledger-rule text-ledger-teal focus:ring-ledger-teal"
+                      className="h-4 w-4 rounded border-rule text-primary focus:ring-primary"
                     />
                     <Avatar user={m} size="sm" />
-                    <span className="w-20 text-sm text-ledger-ink">{m.id === currentUserId ? 'You' : m.name}</span>
+                    <span className="flex-1 text-sm text-ink">{m.id === currentUserId ? 'You' : m.name}</span>
                     <input
                       type="text"
                       value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
                       onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
-                      placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : '$'}
+                      placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : formatMoney(0, groupCurrency)}
                       disabled={splitType === 'equal' || !includedMembers[m.id]}
-                      className="block w-full rounded-md border border-ledger-rule px-3 py-1 text-sm focus:border-ledger-teal focus:outline-none focus:ring-ledger-teal disabled:bg-ledger-paper"
+                      className="w-20 rounded-lg border border-rule bg-surface px-2 py-1.5 text-right text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-2 disabled:text-ink-muted"
                     />
                   </div>
                 ))}
@@ -423,11 +431,12 @@ function ExpensesPageInner() {
             </div>
 
             {splitType !== 'equal' && (
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                 <span
-                  className={`text-sm font-medium ${
-                    Math.abs(remaining) < 0.01 ? 'text-ledger-teal' : 'text-ledger-red'
-                  }`}
+                  className={cn(
+                    'text-sm font-medium',
+                    Math.abs(remaining) < 0.01 ? 'text-primary' : 'text-danger'
+                  )}
                 >
                   {splitType === 'percentage'
                     ? `Unallocated: ${remaining.toFixed(2)}%`
@@ -436,24 +445,24 @@ function ExpensesPageInner() {
                 <button
                   type="button"
                   onClick={distributeEvenly}
-                  className="text-sm font-medium text-ledger-teal hover:text-ledger-teal-dark"
+                  className="text-sm font-medium text-primary hover:text-primary-dark"
                 >
                   Distribute evenly
                 </button>
               </div>
             )}
 
-            <div className="mt-6 flex gap-4">
+            <div className="mt-6 flex gap-3">
               <button
                 type="submit"
-                className="inline-flex items-center rounded-md bg-ledger-teal px-4 py-2 text-sm font-medium text-white hover:bg-ledger-teal-dark"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
               >
                 {editingId ? 'Update' : 'Create'} Expense
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center rounded-md border border-ledger-rule bg-ledger-card px-4 py-2 text-sm font-medium text-ledger-ink hover:bg-ledger-paper"
+                className="inline-flex items-center rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
               >
                 Cancel
               </button>
@@ -465,24 +474,30 @@ function ExpensesPageInner() {
           {expenses.map((expense) => {
             const expenseSplits = splits.filter((s) => s.expense_id === expense.id);
             return (
-              <div key={expense.id} className="rounded-lg bg-ledger-card p-6 border border-ledger-rule shadow-card-sm">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+              <div key={expense.id} className="group relative overflow-hidden rounded-2xl border border-rule bg-surface shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
+                <div className="relative z-10 flex items-start gap-4 p-6">
+                  <div
+                    className="mt-1 h-12 w-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: getCategoryColor(expense.category_id) }}
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: getCategoryColor(expense.category_id) }}
-                      />
                       <Avatar user={getUser(expense.paid_by)} size="sm" />
-                      <h3 className="font-serif text-lg font-semibold text-ledger-ink">{expense.description}</h3>
+                      <h3 className="font-heading text-lg font-semibold text-ink">{expense.description}</h3>
                     </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ledger-ink-muted">
+                    <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-ink-muted">
                       <Money amount={expense.amount} currency={groupCurrency} neutral />
                       <span>Paid by {getUserName(expense.paid_by)}</span>
-                      <span>{getCategoryName(expense.category_id)}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: getCategoryColor(expense.category_id) }}
+                        />
+                        {getCategoryName(expense.category_id)}
+                      </span>
                       <span>{new Date(expense.date).toLocaleDateString()}</span>
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-4 text-sm text-ledger-ink-muted">
+                    <div className="mt-2 flex flex-wrap gap-3 text-sm text-ink-muted">
                       {expenseSplits.map((s) => (
                         <span key={s.id} className="inline-flex items-center gap-1.5">
                           <Avatar user={getUser(s.user_id)} size="sm" />
@@ -491,26 +506,29 @@ function ExpensesPageInner() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                       onClick={() => startEdit(expense)}
-                      className="rounded-md p-2 text-ledger-ink-muted hover:bg-ledger-paper"
+                      className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
                     >
-                      <Edit className="h-5 w-5" />
+                      <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => deleteExpense(expense.id)}
-                      className="rounded-md p-2 text-ledger-red hover:bg-ledger-red-light"
+                      className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-danger-light hover:text-danger"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
+                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
               </div>
             );
           })}
           {expenses.length === 0 && (
-            <p className="text-center text-ledger-ink-muted">No expenses yet. Add your first expense above.</p>
+            <div className="rounded-2xl border border-dashed border-rule bg-surface-2 px-6 py-12 text-center">
+              <p className="text-ink-muted">No expenses yet. Add your first expense above.</p>
+            </div>
           )}
         </div>
       </main>
