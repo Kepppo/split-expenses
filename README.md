@@ -1,22 +1,22 @@
 # SplitExpenses
 
-A personal expense-sharing app built with Next.js, TypeScript, Tailwind CSS, and Supabase.
+A modern expense-sharing app built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. Split expenses across groups with real users, real-time balances, and a refined mobile-first experience.
 
 ## Features
 
-- **Real users, real groups**: No more fake "profiles" — every participant is an actual logged-in account. Create a group and invite people by email; they see and manage their own shared expenses from their own login.
-- **Category-based splitting**: Organize expenses by category with custom split rules, shared within a group
-- **Settle up**: Record a payment between two real users to pay down what's owed — it nets against the balance immediately
-- **Real-time synchronization**: Balances and summaries update instantly across all devices
-- **Flexible split rules**: Equal, percentage, fixed amount, and custom per-person shares
-- **Debt simplification**: Balances are reduced to the minimum number of "who pays whom" transactions
-- **Activity audit trail**: Full history of all changes
-- **Responsive design**: Works on desktop and mobile
+- **Real users, real groups**: Every participant is an actual logged-in account. Create a group, invite by email, and everyone sees their own balances from their own login.
+- **Category-based splitting**: Organize expenses by category with equal, percentage, or fixed split rules.
+- **Settle up**: Record a payment between two users and it nets against the balance immediately.
+- **Real-time synchronization**: Balances and summaries update instantly across all devices via Supabase Realtime.
+- **Debt simplification**: Balances are reduced to the minimum number of "who pays whom" transactions.
+- **Inline quick edit**: Edit groups, categories, and expenses directly from their cards without navigating away.
+- **Activity audit trail**: Full history of all changes across groups.
+- **Responsive design**: Bottom tab navigation on mobile, horizontal nav on desktop.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 + TypeScript + Tailwind CSS
-- **Backend**: Supabase (PostgreSQL + Realtime + Auth)
+- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Realtime + Auth + Storage)
 - **Hosting**: Vercel (frontend), Supabase Cloud (backend)
 
 ## Prerequisites
@@ -44,10 +44,10 @@ A personal expense-sharing app built with Next.js, TypeScript, Tailwind CSS, and
 1. In Supabase dashboard, go to **Settings** > **API**
 2. Copy your **Project URL** and **anon public** key
 3. Create a `.env.local` file in the project root:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=your-project-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   ```
+    ```
+    NEXT_PUBLIC_SUPABASE_URL=your-project-url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+    ```
 
 ### 4. Install Dependencies and Run
 
@@ -60,7 +60,7 @@ Open http://localhost:3000 in your browser.
 
 ### 5. Create Your Account
 
-- Click **Sign up** to create an account. Every real participant needs to do this — there's no "owner adds fake profiles for everyone" anymore.
+- Click **Sign up** to create an account. Every participant needs their own login — there's no "owner adds fake profiles" model.
 
 ### 6. Start Using the App
 
@@ -69,48 +69,43 @@ Open http://localhost:3000 in your browser.
 3. Go to **Categories** and create expense categories for the group
 4. Go to **Expenses** to add expenses with split rules
 5. Use **Settle Up** on a group page to record a payment and net it against the balance
-4. View real-time balances on the **Dashboard**
-
-## Deployment
-
-### Deploy Frontend to Vercel
-
-1. Push your code to GitHub
-2. Go to https://vercel.com and import your repository
-3. Add your Supabase environment variables in Vercel project settings
-4. Deploy
-
-### Database
-
-Your Supabase project is already hosted. No additional deployment needed.
+6. View real-time balances on the **Dashboard**
 
 ## Project Structure
 
 ```
 src/
   app/
-    layout.tsx             - Root layout
-    page.tsx                - Home (redirects to dashboard)
+    layout.tsx             - Root layout with theme providers
+    page.tsx                - Landing page
     login/page.tsx          - Login page
     signup/page.tsx         - Signup page
+    forgot-password/page.tsx - Password reset request
+    reset-password/page.tsx  - Set new password
     dashboard/page.tsx      - Cross-group balance overview
     groups/page.tsx         - Group list, creation, invite acceptance
     groups/[id]/page.tsx    - Group detail: members, balances, settle up
     categories/page.tsx     - Category management (per group)
     expenses/page.tsx       - Expense creation/editing (per group)
-    activity/page.tsx       - Activity log
+    activity/page.tsx       - Activity audit log
+    settings/page.tsx       - User profile and avatar
+    invite/[id]/page.tsx    - Accept invite by link
   components/
-    Navbar.tsx              - Navigation bar
+    Navbar.tsx              - Sticky navigation (desktop + mobile)
+    LedgerCard.tsx          - Card container and Money component
+    Avatar.tsx              - User avatar with initials fallback
     SettleUpModal.tsx       - Record a settlement payment
+    ThemeProvider.tsx       - Light/dark mode context
+    Toast.tsx               - Toast notifications
   lib/
     supabase.ts             - Supabase client
     balances.ts             - Net balance + debt-simplification math
-    utils.ts                - Utility functions
+    utils.ts                - Utility functions (currency, formatting)
   types/
     index.ts                - TypeScript interfaces
 supabase/
-  schema.sql               - Database schema and RLS policies (fresh installs)
-  MIGRATION_NOTES.md        - Notes on moving off the old fake-profiles schema
+  schema.sql               - Database schema and RLS policies
+  MIGRATION_NOTES.md        - Migration notes
 ```
 
 ## License
