@@ -8,7 +8,7 @@ import { formatMoney, currencySymbol } from '@/lib/utils';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar } from '@/components/Avatar';
-import { Plus, Trash2, Edit, ChevronDown, Users, DollarSign } from 'lucide-react';
+import { Plus, Trash2, Edit, ChevronDown, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/Select';
 import { cn } from '@/lib/utils';
@@ -341,7 +341,9 @@ function ExpensesPageInner() {
                   Amount <span className="text-ink-muted">({currencySymbol(groupCurrency)})</span>
                 </label>
                 <div className="relative mt-1.5">
-                  <DollarSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-muted">
+                    {currencySymbol(groupCurrency)}
+                  </span>
                   <input
                     type="number"
                     step="0.01"
