@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { AppUser, Group, GroupMember, GroupInvite, Expense, ExpenseSplit, Settlement } from '@/types';
-import { calculateNetBalances, simplifyDebts } from '@/lib/balances';
+import { calculateNetBalances, simplifyDebts, splitEqually } from '@/lib/balances';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar, AvatarStack } from '@/components/Avatar';
@@ -175,7 +175,13 @@ export default function GroupDetailPage() {
 
     setQuickSubmitting(true);
     const memberIds = members.map((m) => m.user_id);
-    const shares = memberIds.map((id) => ({ user_id: id, amount: Math.round((amountNum / memberIds.length) * 100) / 100 }));
+    const shares = splitEqually(amountNum, memberIds);
+    const totalSplit = Object.values(shares).reduce((sum, a) => sum + a, 0);
+    if (Math.abs(totalSplit - amountNum) > 0.01) {
+      setQuickError('Split total does not match expense amount');
+      setQuickSubmitting(false);
+      return;
+    }
 
     const { data: expense } = await supabase
       .from('expenses')
@@ -192,8 +198,8 @@ export default function GroupDetailPage() {
       .single();
 
     if (expense) {
-      for (const row of shares) {
-        await supabase.from('expense_splits').insert({ expense_id: expense.id, ...row });
+      for (const [userId, shareAmount] of Object.entries(shares)) {
+        await supabase.from('expense_splits').insert({ expense_id: expense.id, user_id: userId, amount: shareAmount });
       }
     }
 
@@ -411,15 +417,24 @@ export default function GroupDetailPage() {
                 {settlements.map((s) => {
                   const expense = s.expense_id ? expenses.find((e) => e.id === s.expense_id) : undefined;
                   return (
-                    <div key={s.id} className="flex items-center justify-between text-sm">
-                      <span className="text-ink">
-                        {s.paid_by === currentUserId ? 'You' : getUserName(s.paid_by)} paid{' '}
-                        {s.paid_to === currentUserId ? 'you' : getUserName(s.paid_to)}{' '}
-                        {expense && <>(for &ldquo;{expense.description}&rdquo;) </>}
-                        <Money amount={s.amount} currency={group.currency} neutral />
-                        {s.note ? ` — ${s.note}` : ''}
-                      </span>
-                      <span className="text-ink-muted">{new Date(s.date).toLocaleDateString()}</span>
+                    <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-2/50 px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar user={getUser(s.paid_by)} size="sm" />
+                        <span className="text-sm text-ink">
+                          <span className="font-medium">{s.paid_by === currentUserId ? 'You' : getUserName(s.paid_by)}</span>
+                          {' paid '}
+                          <span className="font-medium">{s.paid_to === currentUserId ? 'you' : getUserName(s.paid_to)}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {expense && (
+                          <span className="inline-flex items-center rounded-lg bg-primary-light px-2.5 py-1 text-xs font-medium text-primary">
+                            {expense.description}
+                          </span>
+                        )}
+                        <Money amount={s.amount} currency={group.currency} className="text-sm font-semibold" />
+                        <span className="text-xs text-ink-muted">{new Date(s.date).toLocaleDateString()}</span>
+                      </div>
                     </div>
                   );
                 })}

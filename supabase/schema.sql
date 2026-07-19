@@ -444,10 +444,6 @@ create trigger log_expenses_changes
   after insert or update or delete on public.expenses
   for each row execute function public.log_activity();
 
-create trigger log_expense_splits_changes
-  after insert or update or delete on public.expense_splits
-  for each row execute function public.log_activity();
-
 create trigger log_settlements_changes
   after insert or update or delete on public.settlements
   for each row execute function public.log_activity();

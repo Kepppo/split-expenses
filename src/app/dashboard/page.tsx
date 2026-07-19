@@ -395,12 +395,14 @@ export default function DashboardPage() {
           <div>
             <h2 className="font-heading text-xl font-bold text-ink">Recent Activity</h2>
             <div className="mt-4 rounded-2xl border border-rule bg-surface p-6 shadow-card">
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentEvents.map((event) => (
                   <Link
                     key={event.id}
                     href={`/groups/${event.groupId}`}
-                    className="flex items-start justify-between gap-3 border-b border-rule pb-3 last:border-0 last:pb-0 transition-colors hover:bg-surface-2 -mx-2 px-2 rounded-xl"
+                    className={`flex items-start justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-surface-2 border-l-2 ${
+                      event.type === 'expense' ? 'border-emerald-500' : 'border-orange-500'
+                    }`}
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm text-ink">{event.label}</p>

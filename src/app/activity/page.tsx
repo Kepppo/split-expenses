@@ -21,6 +21,15 @@ const ENTITY_ICON: Record<string, typeof Receipt> = {
   expense_splits: Receipt,
 };
 
+const ENTITY_COLORS: Record<string, string> = {
+  expenses: 'bg-emerald-500',
+  settlements: 'bg-orange-500',
+  categories: 'bg-purple-500',
+  groups: 'bg-blue-500',
+  group_members: 'bg-blue-500',
+  expense_splits: 'bg-emerald-500',
+};
+
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -173,17 +182,20 @@ export default function ActivityPage() {
               const actor = actors[log.actor_id];
               const actorName = actor?.name ?? 'Someone';
               const d = describe(log, actorName, groupName(log.group_id ?? undefined), expensesMap);
+              const entityColor = ENTITY_COLORS[log.entity_type] ?? 'bg-gray-500';
+              const article = d.noun.startsWith('e') || d.noun.startsWith('a') || d.noun.startsWith('i') || d.noun.startsWith('o') || d.noun.startsWith('u') ? 'an' : 'a';
               return (
                 <li
                   key={log.id}
                   className="group relative overflow-hidden flex items-center gap-4 rounded-2xl border border-rule bg-surface p-4 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5"
                 >
+                  <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-full ${entityColor}`} />
                   <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-light text-primary">
                     {log.action === 'delete' ? <Trash2 className="h-5 w-5" /> : log.action === 'update' ? <Pencil className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-ink">
-                      <span className="font-medium">{actorName}</span> {d.verb} a {d.noun}
+                      <span className="font-medium">{actorName}</span> {d.verb} {article} {d.noun}
                       {d.detail && <span className="text-ink-muted"> — &ldquo;{d.detail}&rdquo;</span>}
                     </p>
                     <p className="text-xs text-ink-muted">
