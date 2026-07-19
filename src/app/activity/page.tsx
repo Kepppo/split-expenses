@@ -33,20 +33,26 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
-function describe(log: ActivityLog, actorName: string, groupName: string | undefined): { verb: string; noun: string; amount?: number; currency?: string } {
+function describe(log: ActivityLog, actorName: string, groupName: string | undefined, expenses: Record<string, { description: string }> = {}): { verb: string; noun: string; amount?: number; currency?: string; detail?: string } {
   const action = log.action;
   const verb = action === 'create' ? 'added' : action === 'update' ? 'updated' : 'deleted';
   const noun = log.entity_type.replace(/_/g, ' ').replace(/s$/, '');
   let amount: number | undefined;
   let currency: string | undefined;
+  let detail: string | undefined;
   if (log.entity_type === 'expenses' && log.changes_json) {
     amount = typeof log.changes_json.amount === 'number' ? log.changes_json.amount : undefined;
     currency = typeof log.changes_json.currency === 'string' ? log.changes_json.currency : undefined;
+    detail = typeof log.changes_json.description === 'string' ? log.changes_json.description : undefined;
   }
   if (log.entity_type === 'settlements' && log.changes_json) {
     amount = typeof log.changes_json.amount === 'number' ? log.changes_json.amount : undefined;
+    const expenseId = typeof log.changes_json.expense_id === 'string' ? log.changes_json.expense_id : null;
+    if (expenseId && expenses[expenseId]) {
+      detail = expenses[expenseId].description;
+    }
   }
-  return { verb, noun, amount, currency };
+  return { verb, noun, amount, currency, detail };
 }
 
 export default function ActivityPage() {
@@ -54,6 +60,7 @@ export default function ActivityPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [actors, setActors] = useState<Record<string, AppUser>>({});
+  const [expensesMap, setExpensesMap] = useState<Record<string, { description: string }>>({});
   const [filterGroup, setFilterGroup] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +100,14 @@ export default function ActivityPage() {
         const map: Record<string, AppUser> = {};
         (usersData || []).forEach((u: AppUser) => (map[u.id] = u));
         setActors(map);
+      }
+
+      const groupIds = Array.from(new Set(logsData.map((l) => l.group_id).filter((id): id is string => !!id)));
+      if (groupIds.length) {
+        const { data: expensesData } = await supabase.from('expenses').select('id, description').in('group_id', groupIds);
+        const expMap: Record<string, { description: string }> = {};
+        (expensesData || []).forEach((e) => { expMap[e.id] = { description: e.description }; });
+        setExpensesMap(expMap);
       }
 
       setLogs(logsData);
@@ -157,7 +172,7 @@ export default function ActivityPage() {
               const Icon = ENTITY_ICON[log.entity_type] ?? ScrollText;
               const actor = actors[log.actor_id];
               const actorName = actor?.name ?? 'Someone';
-              const d = describe(log, actorName, groupName(log.group_id ?? undefined));
+              const d = describe(log, actorName, groupName(log.group_id ?? undefined), expensesMap);
               return (
                 <li
                   key={log.id}
@@ -169,6 +184,7 @@ export default function ActivityPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-ink">
                       <span className="font-medium">{actorName}</span> {d.verb} a {d.noun}
+                      {d.detail && <span className="text-ink-muted"> — &ldquo;{d.detail}&rdquo;</span>}
                     </p>
                     <p className="text-xs text-ink-muted">
                       {groupName(log.group_id ?? undefined) ?? 'General'} · {timeAgo(log.created_at)}

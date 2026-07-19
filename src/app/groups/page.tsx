@@ -328,21 +328,23 @@ export default function GroupsPage() {
               ) : (
                 <>
                   <div className="relative z-10">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-heading text-lg font-semibold text-ink">{group.name}</h3>
-                        <p className="mt-1.5 flex items-center text-sm text-ink-muted">
-                          <Users className="mr-1.5 h-4 w-4" />
-                          {memberCounts[group.id] || 1} member{(memberCounts[group.id] || 1) === 1 ? '' : 's'}
-                        </p>
+                    <Link href={`/groups/${group.id}`} className="block">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-heading text-lg font-semibold text-ink">{group.name}</h3>
+                          <p className="mt-1.5 flex items-center text-sm text-ink-muted">
+                            <Users className="mr-1.5 h-4 w-4" />
+                            {memberCounts[group.id] || 1} member{(memberCounts[group.id] || 1) === 1 ? '' : 's'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(group); }}
+                          className="rounded-lg p-1.5 text-ink-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-surface-2 hover:text-ink"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
                       </div>
-                      <button
-                        onClick={(e) => { e.preventDefault(); startEdit(group); }}
-                        className="rounded-lg p-1.5 text-ink-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-surface-2 hover:text-ink"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </div>
+                    </Link>
                     <Link
                       href={`/groups/${group.id}`}
                       className="mt-4 flex items-center gap-2 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100"

@@ -10,6 +10,8 @@ A modern expense-sharing app built with Next.js 14, TypeScript, Tailwind CSS, an
 - **Real-time synchronization**: Balances and summaries update instantly across all devices via Supabase Realtime.
 - **Debt simplification**: Balances are reduced to the minimum number of "who pays whom" transactions.
 - **Inline quick edit**: Edit groups, categories, and expenses directly from their cards without navigating away.
+- **Settlement details**: Settlement history and activity log show the related expense name when a payment is linked to a specific expense.
+- **Clickable group cards**: Group items on the dashboard and groups list are fully clickable, with an edit button revealed on hover.
 - **Activity audit trail**: Full history of all changes across groups.
 - **Responsive design**: Bottom tab navigation on mobile, horizontal nav on desktop.
 

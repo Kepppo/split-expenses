@@ -119,6 +119,7 @@ create table if not exists public.settlements (
   amount numeric not null check (amount > 0),
   date date not null default current_date,
   note text,
+  expense_id uuid references public.expenses(id) on delete set null,
   created_by uuid references public.users(id) not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   check (paid_by <> paid_to)

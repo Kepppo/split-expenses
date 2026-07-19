@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { AppUser } from '@/types';
+import { AppUser, Expense } from '@/types';
 import { X } from 'lucide-react';
 import { currencySymbol } from '@/lib/utils';
 import { Select } from '@/components/Select';
@@ -12,6 +12,7 @@ interface SettleUpModalProps {
   groupId: string;
   currentUserId: string;
   members: AppUser[];
+  expenses?: Expense[];
   defaultPayTo?: string;
   defaultAmount?: number;
   currency?: string;
@@ -23,6 +24,7 @@ export function SettleUpModal({
   groupId,
   currentUserId,
   members,
+  expenses = [],
   defaultPayTo,
   defaultAmount,
   currency = 'EUR',
@@ -34,6 +36,7 @@ export function SettleUpModal({
   const [amount, setAmount] = useState(defaultAmount ? defaultAmount.toFixed(2) : '');
   const [note, setNote] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedExpenseId, setSelectedExpenseId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [stamped, setStamped] = useState(false);
@@ -56,6 +59,7 @@ export function SettleUpModal({
       amount: amountNum,
       date,
       note: note.trim() || null,
+      expense_id: selectedExpenseId || null,
       created_by: currentUserId,
     });
     setSubmitting(false);
@@ -134,6 +138,24 @@ export function SettleUpModal({
               className="mt-1 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
+
+          {expenses.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-ink">Related expense (optional)</label>
+              <Select
+                value={selectedExpenseId}
+                onChange={(e) => setSelectedExpenseId(e.target.value)}
+                className="mt-1 h-10"
+              >
+                <option value="">— none —</option>
+                {expenses.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.description} ({currencySymbol(currency)}{e.amount})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-ink">Note (optional)</label>

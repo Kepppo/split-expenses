@@ -272,17 +272,21 @@ export default function GroupDetailPage() {
             <div className="rounded-2xl border border-rule bg-surface p-6 shadow-card">
               <h2 className="mb-4 font-heading text-lg font-semibold text-ink">Settlement history</h2>
               <div className="space-y-3">
-                {settlements.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between text-sm">
-                    <span className="text-ink">
-                      {s.paid_by === currentUserId ? 'You' : getUserName(s.paid_by)} paid{' '}
-                      {s.paid_to === currentUserId ? 'you' : getUserName(s.paid_to)}{' '}
-                      <Money amount={s.amount} currency={group.currency} neutral />
-                      {s.note ? ` — ${s.note}` : ''}
-                    </span>
-                    <span className="text-ink-muted">{new Date(s.date).toLocaleDateString()}</span>
-                  </div>
-                ))}
+                {settlements.map((s) => {
+                  const expense = s.expense_id ? expenses.find((e) => e.id === s.expense_id) : undefined;
+                  return (
+                    <div key={s.id} className="flex items-center justify-between text-sm">
+                      <span className="text-ink">
+                        {s.paid_by === currentUserId ? 'You' : getUserName(s.paid_by)} paid{' '}
+                        {s.paid_to === currentUserId ? 'you' : getUserName(s.paid_to)}{' '}
+                        {expense && <>(for &ldquo;{expense.description}&rdquo;) </>}
+                        <Money amount={s.amount} currency={group.currency} neutral />
+                        {s.note ? ` — ${s.note}` : ''}
+                      </span>
+                      <span className="text-ink-muted">{new Date(s.date).toLocaleDateString()}</span>
+                    </div>
+                  );
+                })}
                 {settlements.length === 0 && (
                   <p className="text-sm text-ink-muted">No settlements recorded yet.</p>
                 )}
@@ -374,6 +378,7 @@ export default function GroupDetailPage() {
           groupId={groupId}
           currentUserId={currentUserId}
           members={memberUsers}
+          expenses={expenses}
           defaultPayTo={prefill.to}
           defaultAmount={prefill.amount}
           currency={group.currency}

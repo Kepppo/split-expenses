@@ -71,6 +71,7 @@ export interface Settlement {
   amount: number;
   date: string;
   note: string | null;
+  expense_id: string | null;
   created_by: string;
   created_at: string;
 }

@@ -8,9 +8,11 @@ import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar, AvatarStack } from '@/components/Avatar';
 import { SettleUpModal } from '@/components/SettleUpModal';
-import { PlusCircle, Wallet, Users, CalendarDays, HandCoins, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { PlusCircle, Wallet, Users, CalendarDays, HandCoins, ArrowUpRight, ArrowDownRight, Edit, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CURRENCIES } from '@/lib/utils';
+import { Select } from '@/components/Select';
 
 interface GroupSummary {
   group: Group;
@@ -51,6 +53,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settleTarget, setSettleTarget] = useState<GroupSummary | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCurrency, setEditCurrency] = useState('EUR');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -137,12 +142,15 @@ export default function DashboardPage() {
           });
         }
         for (const s of settlements) {
+          const expense = expenses.find((e) => e.id === s.expense_id);
           events.push({
             id: `settlement-${s.id}`,
             type: 'settlement',
             groupId: group.id,
             groupName: group.name,
-            label: `${getName(s.paid_by)} paid ${getName(s.paid_to)} in ${group.name}`,
+            label: expense
+              ? `${getName(s.paid_by)} paid ${getName(s.paid_to)} for "${expense.description}" in ${group.name}`
+              : `${getName(s.paid_by)} paid ${getName(s.paid_to)} in ${group.name}`,
             amount: s.amount,
             currency: group.currency,
             createdAt: s.created_at,
@@ -161,6 +169,32 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const startEdit = (group: Group) => {
+    setEditingId(group.id);
+    setEditName(group.name);
+    setEditCurrency(group.currency);
+  };
+
+  const saveEdit = async (groupId: string) => {
+    if (!editName.trim()) return;
+    const { error } = await supabase.from('groups').update({
+      name: editName.trim(),
+      currency: editCurrency,
+    }).eq('id', groupId);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setEditingId(null);
+    fetchData();
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditCurrency('EUR');
   };
 
   const totalOwedToMe = summaries.reduce((sum, s) => sum + Math.max(s.myBalance, 0), 0);
@@ -253,48 +287,91 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading text-xl font-bold text-ink">Your Groups</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {summaries.map((summary) => {
-                const { group, members, myBalance, myTopCreditor } = summary;
-                return (
-                  <div
-                    key={group.id}
-                    className="group relative overflow-hidden rounded-2xl border border-rule bg-surface p-6 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5"
-                  >
-                    <Link href={`/groups/${group.id}`} className="block">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-heading text-lg font-semibold text-ink">{group.name}</h3>
-                          <p className="mt-1 text-sm text-ink-muted">
-                            {members.length} member{members.length === 1 ? '' : 's'}
-                          </p>
+            <div className="lg:col-span-2 space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="font-heading text-xl font-bold text-ink">Your Groups</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {summaries.map((summary) => {
+                  const { group, members, myBalance, myTopCreditor } = summary;
+                  return (
+                    <div
+                      key={group.id}
+                      className="group relative overflow-hidden rounded-2xl border border-rule bg-surface p-6 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5"
+                    >
+                      {editingId === group.id ? (
+                        <div className="relative z-10 space-y-3">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full rounded-xl border border-rule bg-surface-2 px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            autoFocus
+                          />
+                          <Select
+                            value={editCurrency}
+                            onChange={(e) => setEditCurrency(e.target.value)}
+                            className="w-full"
+                          >
+                            {CURRENCIES.map((c) => (
+                              <option key={c.code} value={c.code}>{c.code} — {c.label}</option>
+                            ))}
+                          </Select>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => saveEdit(group.id)}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white"
+                            >
+                              <Check className="h-3.5 w-3.5" /> Save
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-rule bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                        <AvatarStack users={members} max={3} />
-                      </div>
-                      <Money amount={myBalance} currency={summary.group.currency} className="mt-3 block text-2xl font-bold" />
-                      <p className="mt-1 text-sm text-ink-muted">
-                        {myBalance >= 0 ? 'owed to you' : 'you owe'}
-                      </p>
-                    </Link>
-                    <div className="relative z-10 mt-4 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      {myTopCreditor && (
-                        <button
-                          onClick={() => setSettleTarget(summary)}
-                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
-                        >
-                          <HandCoins className="h-4 w-4" />
-                          Settle up
-                        </button>
+                      ) : (
+                        <>
+                          <Link href={`/groups/${group.id}`} className="block">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-heading text-lg font-semibold text-ink">{group.name}</h3>
+                                <p className="mt-1 text-sm text-ink-muted">
+                                  {members.length} member{members.length === 1 ? '' : 's'}
+                                </p>
+                              </div>
+                              <AvatarStack users={members} max={3} />
+                            </div>
+                            <Money amount={myBalance} currency={summary.group.currency} className="mt-3 block text-2xl font-bold" />
+                            <p className="mt-1 text-sm text-ink-muted">
+                              {myBalance >= 0 ? 'owed to you' : 'you owe'}
+                            </p>
+                          </Link>
+                          <div className="relative z-10 mt-4 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            {myTopCreditor && (
+                              <button
+                                onClick={() => setSettleTarget(summary)}
+                                className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
+                              >
+                                <HandCoins className="h-4 w-4" />
+                                Settle up
+                              </button>
+                            )}
+                            <button
+                              onClick={(e) => { e.preventDefault(); startEdit(group); }}
+                              className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
+                        </>
                       )}
                     </div>
-                    <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
-                  </div>
-                );
-              })}
+                  );
+                })}
               {summaries.length === 0 && (
                 <div className="col-span-full rounded-2xl border border-dashed border-rule bg-surface-2 px-6 py-12 text-center">
                   <p className="text-ink-muted">
