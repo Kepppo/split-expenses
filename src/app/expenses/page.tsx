@@ -420,21 +420,6 @@ function ExpensesPageInner() {
 
             {showAdvancedSplit && (
               <>
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium text-ink">Split Type</label>
-                    <Select
-                      value={splitType}
-                      onChange={(e) => setSplitType(e.target.value as SplitType)}
-                      className="mt-1.5"
-                    >
-                      <option value="equal">Equal</option>
-                      <option value="percentage">Percentage</option>
-                      <option value="fixed">Fixed Amount</option>
-                    </Select>
-                  </div>
-                </div>
-
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-ink mb-2">Split Among</label>
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
