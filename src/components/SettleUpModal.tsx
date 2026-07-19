@@ -140,6 +140,24 @@ export function SettleUpModal({
             </Select>
           </div>
 
+          {relevantExpenses.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-ink">Related expense (optional)</label>
+              <Select
+                value={selectedExpenseId}
+                onChange={(e) => setSelectedExpenseId(e.target.value)}
+                className="mt-1 h-10"
+              >
+                <option value="">— none —</option>
+                {relevantExpenses.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.description} ({currencySymbol(currency)}{userShares[e.id]})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-ink">
               Amount <span className="text-ink-muted">({currencySymbol(currency)})</span>
@@ -165,24 +183,6 @@ export function SettleUpModal({
               className="mt-1 block w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
-
-          {relevantExpenses.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-ink">Related expense (optional)</label>
-              <Select
-                value={selectedExpenseId}
-                onChange={(e) => setSelectedExpenseId(e.target.value)}
-                className="mt-1 h-10"
-              >
-                <option value="">— none —</option>
-                {relevantExpenses.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.description} ({currencySymbol(currency)}{userShares[e.id]})
-                  </option>
-                ))}
-              </Select>
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-ink">Note (optional)</label>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { AppUser, Group, GroupMember, GroupInvite, Expense, ExpenseSplit, Settlement } from '@/types';
 import { calculateNetBalances, simplifyDebts } from '@/lib/balances';
@@ -9,8 +9,10 @@ import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar, AvatarStack } from '@/components/Avatar';
 import { SettleUpModal } from '@/components/SettleUpModal';
-import { Mail, UserMinus, HandCoins, Receipt, Plus } from 'lucide-react';
+import { Mail, UserMinus, HandCoins, Receipt, Plus, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Select } from '@/components/Select';
 import { useToast } from '@/components/Toast';
 
 export default function GroupDetailPage() {
@@ -32,6 +34,13 @@ export default function GroupDetailPage() {
   const [prefill, setPrefill] = useState<{ to?: string; amount?: number }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [quickDesc, setQuickDesc] = useState('');
+  const [quickAmount, setQuickAmount] = useState('');
+  const [quickDate, setQuickDate] = useState(new Date().toISOString().split('T')[0]);
+  const [quickPaidBy, setQuickPaidBy] = useState('');
+  const [quickError, setQuickError] = useState<string | null>(null);
+  const [quickSubmitting, setQuickSubmitting] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -153,6 +162,50 @@ export default function GroupDetailPage() {
     setShowSettleModal(true);
   };
 
+  const handleQuickAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setQuickError(null);
+    if (!quickDesc.trim() || !quickAmount || !quickDate || !quickPaidBy) return;
+
+    const amountNum = parseFloat(quickAmount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setQuickError('Enter a valid amount');
+      return;
+    }
+
+    setQuickSubmitting(true);
+    const memberIds = members.map((m) => m.user_id);
+    const shares = memberIds.map((id) => ({ user_id: id, amount: Math.round((amountNum / memberIds.length) * 100) / 100 }));
+
+    const { data: expense } = await supabase
+      .from('expenses')
+      .insert({
+        group_id: groupId,
+        created_by: currentUserId!,
+        description: quickDesc.trim(),
+        amount: amountNum,
+        date: quickDate,
+        paid_by: quickPaidBy,
+        category_id: null,
+      })
+      .select()
+      .single();
+
+    if (expense) {
+      for (const row of shares) {
+        await supabase.from('expense_splits').insert({ expense_id: expense.id, ...row });
+      }
+    }
+
+    setQuickSubmitting(false);
+    setShowQuickAdd(false);
+    setQuickDesc('');
+    setQuickAmount('');
+    setQuickDate(new Date().toISOString().split('T')[0]);
+    setQuickPaidBy(currentUserId || '');
+    fetchData();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -201,6 +254,13 @@ export default function GroupDetailPage() {
               View Expenses
             </Link>
             <button
+              onClick={() => setShowQuickAdd(!showQuickAdd)}
+              className="inline-flex items-center gap-2 rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm font-medium text-ink shadow-card transition-colors hover:bg-surface-2"
+            >
+              {showQuickAdd ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {showQuickAdd ? 'Cancel' : 'Quick Add'}
+            </button>
+            <button
               onClick={() => openSettleModal()}
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg"
             >
@@ -209,6 +269,82 @@ export default function GroupDetailPage() {
             </button>
           </div>
         </div>
+
+        {showQuickAdd && (
+          <form onSubmit={handleQuickAdd} className="mb-8 rounded-2xl border border-rule bg-surface p-6 shadow-card">
+            <h3 className="mb-4 font-heading text-base font-semibold text-ink">Quick Add Expense</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="lg:col-span-2">
+                <label className="mb-1.5 block text-sm font-medium text-ink-muted">Description</label>
+                <input
+                  type="text"
+                  value={quickDesc}
+                  onChange={(e) => setQuickDesc(e.target.value)}
+                  placeholder="e.g., Groceries, Taxi"
+                  required
+                  className="w-full rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-ink-muted">Amount</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={quickAmount}
+                  onChange={(e) => setQuickAmount(e.target.value)}
+                  placeholder="0.00"
+                  required
+                  className="w-full rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-ink-muted">Date</label>
+                <input
+                  type="date"
+                  value={quickDate}
+                  onChange={(e) => setQuickDate(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-ink-muted">Paid By</label>
+                <Select
+                  value={quickPaidBy}
+                  onChange={(e) => setQuickPaidBy(e.target.value)}
+                  required
+                  className="h-10"
+                >
+                  {members.map((m) => {
+                    const user = memberUsers.find((u) => u.id === m.user_id);
+                    return (
+                      <option key={m.id} value={m.user_id}>{m.user_id === currentUserId ? 'You' : user?.name || 'Unknown'}</option>
+                    );
+                  })}
+                </Select>
+              </div>
+            </div>
+            {quickError && <div className="mt-3 rounded-lg bg-danger-light p-3 text-sm text-danger">{quickError}</div>}
+            <div className="mt-4 flex gap-3">
+              <button
+                type="submit"
+                disabled={quickSubmitting}
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-all hover:bg-primary-dark hover:shadow-glow-lg disabled:opacity-50"
+              >
+                {quickSubmitting ? 'Adding...' : 'Add Expense'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowQuickAdd(false)}
+                className="inline-flex items-center rounded-xl border border-rule bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+              >
+                Cancel
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-ink-muted">Split equally among all {members.length} members. For advanced splits, use the Expenses page.</p>
+          </form>
+        )}
 
         {error && (
           <div className="mb-4 rounded-lg bg-danger-light p-3.5 text-sm text-danger">{error}</div>

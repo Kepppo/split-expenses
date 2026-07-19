@@ -8,7 +8,7 @@ import { formatMoney, currencySymbol } from '@/lib/utils';
 import { Navbar } from '@/components/Navbar';
 import { Money } from '@/components/LedgerCard';
 import { Avatar } from '@/components/Avatar';
-import { Plus, Trash2, Edit, ChevronDown, Users } from 'lucide-react';
+import { Plus, Trash2, Edit, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/Select';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,7 @@ function ExpensesPageInner() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAdvancedSplit, setShowAdvancedSplit] = useState(false);
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -406,52 +407,82 @@ function ExpensesPageInner() {
               </div>
             </div>
 
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-ink mb-2">Split Among</label>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {members.map((m) => (
-                  <div key={m.id} className="flex items-center gap-3 rounded-xl border border-rule bg-surface-2/50 p-3">
-                    <input
-                      type="checkbox"
-                      checked={!!includedMembers[m.id]}
-                      onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
-                      className="h-4 w-4 rounded border-rule text-primary focus:ring-primary"
-                    />
-                    <Avatar user={m} size="sm" />
-                    <span className="flex-1 text-sm text-ink">{m.id === currentUserId ? 'You' : m.name}</span>
-                    <input
-                      type="text"
-                      value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
-                      onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
-                      placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : formatMoney(0, groupCurrency)}
-                      disabled={splitType === 'equal' || !includedMembers[m.id]}
-                      className="w-20 rounded-lg border border-rule bg-surface px-2 py-1.5 text-right text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-2 disabled:text-ink-muted"
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedSplit(!showAdvancedSplit)}
+                className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-dark"
+              >
+                {showAdvancedSplit ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {showAdvancedSplit ? 'Hide' : 'Show'} advanced split options
+              </button>
             </div>
 
-            {splitType !== 'equal' && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                <span
-                  className={cn(
-                    'text-sm font-medium',
-                    Math.abs(remaining) < 0.01 ? 'text-primary' : 'text-danger'
-                  )}
-                >
-                  {splitType === 'percentage'
-                    ? `Unallocated: ${remaining.toFixed(2)}%`
-                    : `Remaining: ${formatMoney(Math.abs(remaining), groupCurrency)}`}
-                </span>
-                <button
-                  type="button"
-                  onClick={distributeEvenly}
-                  className="text-sm font-medium text-primary hover:text-primary-dark"
-                >
-                  Distribute evenly
-                </button>
-              </div>
+            {showAdvancedSplit && (
+              <>
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-ink">Split Type</label>
+                    <Select
+                      value={splitType}
+                      onChange={(e) => setSplitType(e.target.value as SplitType)}
+                      className="mt-1.5"
+                    >
+                      <option value="equal">Equal</option>
+                      <option value="percentage">Percentage</option>
+                      <option value="fixed">Fixed Amount</option>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-ink mb-2">Split Among</label>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {members.map((m) => (
+                      <div key={m.id} className="flex items-center gap-3 rounded-xl border border-rule bg-surface-2/50 p-3">
+                        <input
+                          type="checkbox"
+                          checked={!!includedMembers[m.id]}
+                          onChange={(e) => setIncludedMembers({ ...includedMembers, [m.id]: e.target.checked })}
+                          className="h-4 w-4 rounded border-rule text-primary focus:ring-primary"
+                        />
+                        <Avatar user={m} size="sm" />
+                        <span className="flex-1 text-sm text-ink">{m.id === currentUserId ? 'You' : m.name}</span>
+                        <input
+                          type="text"
+                          value={splitValues[m.id] || (splitType === 'equal' ? '' : '0')}
+                          onChange={(e) => setSplitValues({ ...splitValues, [m.id]: e.target.value })}
+                          placeholder={splitType === 'equal' ? 'Equal' : splitType === 'percentage' ? '%' : formatMoney(0, groupCurrency)}
+                          disabled={splitType === 'equal' || !includedMembers[m.id]}
+                          className="w-20 rounded-lg border border-rule bg-surface px-2 py-1.5 text-right text-sm text-ink shadow-sm transition-colors placeholder:text-ink-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-2 disabled:text-ink-muted"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {splitType !== 'equal' && (
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        Math.abs(remaining) < 0.01 ? 'text-primary' : 'text-danger'
+                      )}
+                    >
+                      {splitType === 'percentage'
+                        ? `Unallocated: ${remaining.toFixed(2)}%`
+                        : `Remaining: ${formatMoney(Math.abs(remaining), groupCurrency)}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={distributeEvenly}
+                      className="text-sm font-medium text-primary hover:text-primary-dark"
+                    >
+                      Distribute evenly
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="mt-6 flex gap-3">
