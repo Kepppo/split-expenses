@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AppUser, Expense } from '@/types';
 import { X } from 'lucide-react';
@@ -40,6 +40,14 @@ export function SettleUpModal({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [stamped, setStamped] = useState(false);
+
+  useEffect(() => {
+    if (!selectedExpenseId) return;
+    const expense = expenses.find((e) => e.id === selectedExpenseId);
+    if (expense) {
+      setAmount(expense.amount.toFixed(2));
+    }
+  }, [selectedExpenseId, expenses]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
