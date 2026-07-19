@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { AppUser, Expense } from '@/types';
+import { AppUser, Expense, ExpenseSplit } from '@/types';
 import { X } from 'lucide-react';
 import { currencySymbol } from '@/lib/utils';
 import { Select } from '@/components/Select';
@@ -13,6 +13,7 @@ interface SettleUpModalProps {
   currentUserId: string;
   members: AppUser[];
   expenses?: Expense[];
+  splits?: ExpenseSplit[];
   defaultPayTo?: string;
   defaultAmount?: number;
   currency?: string;
@@ -25,6 +26,7 @@ export function SettleUpModal({
   currentUserId,
   members,
   expenses = [],
+  splits = [],
   defaultPayTo,
   defaultAmount,
   currency = 'EUR',
@@ -41,13 +43,30 @@ export function SettleUpModal({
   const [submitting, setSubmitting] = useState(false);
   const [stamped, setStamped] = useState(false);
 
+  const userShares = expenses.reduce<Record<string, number>>((acc, expense) => {
+    const expenseSplits = splits.filter((s) => s.expense_id === expense.id);
+    const mySplit = expenseSplits.find((s) => s.user_id === currentUserId);
+    if (mySplit) {
+      acc[expense.id] = mySplit.amount;
+    }
+    return acc;
+  }, {});
+
+  const relevantExpenses = expenses.filter((e) => e.paid_by === paidTo && userShares[e.id] > 0);
+
   useEffect(() => {
     if (!selectedExpenseId) return;
     const expense = expenses.find((e) => e.id === selectedExpenseId);
-    if (expense) {
-      setAmount(expense.amount.toFixed(2));
+    if (!expense || expense.paid_by !== paidTo) {
+      setSelectedExpenseId('');
+      setAmount(defaultAmount ? defaultAmount.toFixed(2) : '');
+      return;
     }
-  }, [selectedExpenseId, expenses]);
+    const share = userShares[selectedExpenseId];
+    if (share) {
+      setAmount(share.toFixed(2));
+    }
+  }, [selectedExpenseId, expenses, paidTo, userShares, defaultAmount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +166,7 @@ export function SettleUpModal({
             />
           </div>
 
-          {expenses.length > 0 && (
+          {relevantExpenses.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-ink">Related expense (optional)</label>
               <Select
@@ -156,9 +175,9 @@ export function SettleUpModal({
                 className="mt-1 h-10"
               >
                 <option value="">— none —</option>
-                {expenses.map((e) => (
+                {relevantExpenses.map((e) => (
                   <option key={e.id} value={e.id}>
-                    {e.description} ({currencySymbol(currency)}{e.amount})
+                    {e.description} ({currencySymbol(currency)}{userShares[e.id]})
                   </option>
                 ))}
               </Select>

@@ -379,6 +379,7 @@ export default function GroupDetailPage() {
           currentUserId={currentUserId}
           members={memberUsers}
           expenses={expenses}
+          splits={splits}
           defaultPayTo={prefill.to}
           defaultAmount={prefill.amount}
           currency={group.currency}

@@ -56,6 +56,8 @@ export default function DashboardPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editCurrency, setEditCurrency] = useState('EUR');
+  const [groupExpenses, setGroupExpenses] = useState<Record<string, Expense[]>>({});
+  const [groupSplits, setGroupSplits] = useState<Record<string, ExpenseSplit[]>>({});
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -93,6 +95,8 @@ export default function DashboardPage() {
       const events: RecentEvent[] = [];
       const now = new Date();
       let spend = 0;
+      const expensesByGroup: Record<string, Expense[]> = {};
+      const splitsByGroup: Record<string, ExpenseSplit[]> = {};
 
       for (const group of groups) {
         const { data: membersData } = await supabase.from('group_members').select('*').eq('group_id', group.id);
@@ -104,11 +108,13 @@ export default function DashboardPage() {
 
         const { data: expensesData } = await supabase.from('expenses').select('*').eq('group_id', group.id);
         const expenses: Expense[] = expensesData || [];
+        expensesByGroup[group.id] = expenses;
 
         const expenseIds = expenses.map((e) => e.id);
         const { data: splitsData } = expenseIds.length
           ? await supabase.from('expense_splits').select('*').in('expense_id', expenseIds)
           : { data: [] };
+        splitsByGroup[group.id] = (splitsData || []) as ExpenseSplit[];
 
         const { data: settlementsData } = await supabase.from('settlements').select('*').eq('group_id', group.id);
         const settlements: Settlement[] = (settlementsData || []) as Settlement[];
@@ -164,6 +170,8 @@ export default function DashboardPage() {
       setSummaries(results);
       setRecentEvents(events.slice(0, 6));
       setMonthSpend(spend);
+      setGroupExpenses(expensesByGroup);
+      setGroupSplits(splitsByGroup);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -415,6 +423,8 @@ export default function DashboardPage() {
           groupId={settleTarget.group.id}
           currentUserId={currentUserId}
           members={settleTarget.members}
+          expenses={groupExpenses[settleTarget.group.id] || []}
+          splits={groupSplits[settleTarget.group.id] || []}
           defaultPayTo={settleTarget.myTopCreditor?.id}
           defaultAmount={settleTarget.myTopCreditor?.amount}
           currency={settleTarget.group.currency}
